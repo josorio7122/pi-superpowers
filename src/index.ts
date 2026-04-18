@@ -1,11 +1,16 @@
-// Migration in progress (Tasks 3-9): subagent dispatch is being rewritten onto pi-agents primitives.
-// During this window the extension registers only the tools that still compile — Task 9 restores
-// full registration including superpowers_subagent + /todos command.
+// Thin pi extension entrypoint. v5.1: no feature flags; pi-agents is a hard peer dep.
 
 import { buildInjectHandler } from "./bootstrap/inject.js";
 import { buildResourcesDiscoverHandler } from "./skills/discover.js";
+import { loadAgents } from "./subagents/loader.js";
+import { executeSubagent, type PiAgentsApi } from "./subagents/tool.js";
+import { buildTodosCommandHandler } from "./todos/command.js";
+import { reconstructTodos, type SessionEntryLike } from "./todos/state.js";
 import { executeTodos } from "./todos/tool.js";
+import { renderCompactTodo } from "./ui/compact-todo.js";
 import { clearSuperpowersStatus, setSuperpowersStatus } from "./ui/status.js";
+import { createTheme } from "./ui/theme.js";
+import { setWidget } from "./ui/widget.js";
 
 type ExtensionAPI = {
 	on: (event: string, handler: (...args: unknown[]) => unknown) => void;
@@ -13,18 +18,49 @@ type ExtensionAPI = {
 	registerCommand: (name: string, spec: unknown) => void;
 };
 
+async function loadPiAgents(): Promise<PiAgentsApi> {
+	const mod = (await import("pi-agents")) as unknown as Partial<PiAgentsApi>;
+	if (
+		typeof mod.runAgent !== "function" ||
+		typeof mod.executeSingle !== "function" ||
+		typeof mod.executeParallel !== "function" ||
+		typeof mod.executeChain !== "function"
+	) {
+		throw new Error(
+			"pi-superpowers v5.1 requires pi-agents to be installed. Run: pi install git:github.com/josorio7122/pi-agents",
+		);
+	}
+	return mod as PiAgentsApi;
+}
+
 export default async function superpowersExtension(pi: ExtensionAPI): Promise<void> {
-	const inject = buildInjectHandler({ subagentAvailable: false });
+	const piAgentsApi = await loadPiAgents();
+
+	const inject = buildInjectHandler({ subagentAvailable: true });
 	const discover = buildResourcesDiscoverHandler();
 
 	pi.on("before_agent_start", inject as never);
 	pi.on("resources_discover", discover as never);
 
 	pi.on("session_start", (async (_event: unknown, ctx: unknown) => {
-		setSuperpowersStatus(ctx as never, { text: "Superpowers · migration in progress" });
+		setSuperpowersStatus(ctx as never, { text: "Superpowers · v5.1.0 · 15 skills · subagents" });
 		setTimeout(() => {
 			clearSuperpowersStatus(ctx as never);
 		}, 3000);
+	}) as never);
+
+	// Re-apply the todo widget after compaction so it survives /compact.
+	pi.on("session_compact", (async (_event: unknown, ctx: unknown) => {
+		const anyCtx = ctx as {
+			sessionManager: { getEntries: () => SessionEntryLike[] };
+			ui: { colorEnabled?: boolean; width?: number };
+		};
+		const items = reconstructTodos(anyCtx.sessionManager.getEntries());
+		if (items.length === 0) return;
+		const theme = createTheme({ color: anyCtx.ui.colorEnabled !== false });
+		const width = anyCtx.ui.width ?? 80;
+		const line = renderCompactTodo({ items, theme, width });
+		setWidget(anyCtx as never, { name: "todos", lines: [line] });
 	}) as never);
 
 	pi.registerTool({
@@ -33,5 +69,40 @@ export default async function superpowersExtension(pi: ExtensionAPI): Promise<vo
 		// biome-ignore lint/complexity/useMaxParams: pi's tool execute signature is fixed at 5 params
 		execute: (_toolCallId: string, params: unknown, _signal: unknown, _onUpdate: unknown, ctx: unknown) =>
 			executeTodos(ctx as never, params),
+	});
+
+	pi.registerCommand("todos", {
+		description: "Open the interactive todos picker",
+		handler: buildTodosCommandHandler(),
+	});
+
+	const { agents } = await loadAgents();
+	pi.registerTool({
+		name: "superpowers_subagent",
+		description:
+			"Dispatch a named superpowers agent via pi-agents. Modes: single {agent,task}, parallel {tasks:[...]}, chain {chain:[...]}.",
+		// biome-ignore lint/complexity/useMaxParams: pi's tool execute signature is fixed at 5 params
+		execute: (_toolCallId: string, params: unknown, signal: unknown, _onUpdate: unknown, ctx: unknown) => {
+			const anyCtx = ctx as {
+				ui: { colorEnabled?: boolean; width?: number };
+				cwd: string;
+				sessionManager: { getSessionDir: () => string };
+				modelRegistry: unknown;
+				model?: { id: string };
+			};
+			return executeSubagent({
+				input: params,
+				agents,
+				piAgentsApi,
+				ctx: {
+					ui: anyCtx.ui,
+					cwd: anyCtx.cwd,
+					sessionDir: anyCtx.sessionManager.getSessionDir(),
+					modelRegistry: anyCtx.modelRegistry,
+					modelId: anyCtx.model?.id,
+					...(signal instanceof AbortSignal ? { signal } : {}),
+				},
+			});
+		},
 	});
 }
