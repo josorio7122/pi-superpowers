@@ -1,8 +1,8 @@
 import { Value } from "@sinclair/typebox/value";
-import { renderCompactTodo } from "../ui/compact-todo.js";
+import { renderTodosWidget } from "../ui/compact-todo.js";
 import { createTheme } from "../ui/theme.js";
 import { clearWidget, setWidget } from "../ui/widget.js";
-import { renderTodosPanel } from "./render.js";
+import { renderTodosError, renderTodosResult } from "./render.js";
 import { type TodoAction, TodoActionSchema, type TodoItem } from "./schema.js";
 import { reconstructTodos, type SessionEntryLike } from "./state.js";
 
@@ -66,33 +66,35 @@ export function executeTodos(ctx: TodosToolCtx, input: unknown): TodosToolResult
 	const action = input as TodoAction;
 	const prior = reconstructTodos(ctx.sessionManager.getEntries());
 
+	const color = ctx.ui.colorEnabled !== false;
+	const width = ctx.ui.width ?? 80;
+	const theme = createTheme({ color });
+
 	// Guard: complete / update / remove are no-ops on empty state. Before this
 	// guard, a bug in reconstructTodos (v5.1.1) could silently return empty and
 	// the model would lose its list without any signal. Surface a clear error so
 	// the root cause is visible.
 	const mutating = action.action === "complete" || action.action === "update" || action.action === "remove";
 	if (mutating && prior.length === 0) {
+		const errorLines = renderTodosError({
+			action: action.action,
+			message: "no prior todos in session — use 'add' or 'replace' first",
+			theme,
+			width,
+		});
 		return {
-			content: [
-				{
-					type: "text",
-					text: `Cannot apply '${action.action}' — no prior todos found in session. Use 'add' or 'replace' first.`,
-				},
-			],
+			content: [{ type: "text", text: errorLines.join("\n") }],
 			details: { todos: [], action: "error" },
 		};
 	}
 
 	const todos = applyAction(prior, action);
 
-	const color = ctx.ui.colorEnabled !== false;
-	const width = ctx.ui.width ?? 80;
-	const theme = createTheme({ color });
-	const panelRows = renderTodosPanel({ items: todos, theme, width });
-	const widgetRow = renderCompactTodo({ items: todos, theme, width });
+	const panelRows = renderTodosResult({ items: todos, action: action.action, theme, width });
+	const widgetLines = renderTodosWidget({ items: todos, theme, width });
 
 	if (todos.length === 0) clearWidget(ctx as never, "todos");
-	else setWidget(ctx as never, { name: "todos", lines: [widgetRow] });
+	else setWidget(ctx as never, { name: "todos", lines: widgetLines });
 
 	return {
 		content: [{ type: "text", text: panelRows.join("\n") }],

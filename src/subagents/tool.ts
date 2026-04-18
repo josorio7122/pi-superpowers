@@ -120,8 +120,9 @@ async function handleSingle(
 		const runner = await runnerFor({ agent, ctx, api: piAgentsApi });
 		const raw = await piAgentsApi.executeSingle({ task: input.task, runAgent: runner });
 		const result = toRunResult(agent.name, raw);
+		const primaryArg = `${agent.name}: "${input.task}"`;
 		return {
-			content: [{ type: "text", text: renderSingleResult({ result, width, theme }).join("\n") }],
+			content: [{ type: "text", text: renderSingleResult({ result, primaryArg, width, theme }).join("\n") }],
 			details: { mode: "single", agent: input.agent, metrics: result.metrics, error: result.error ?? null },
 		};
 	} catch (err) {
@@ -162,9 +163,13 @@ async function handleMulti(params: HandleMultiParams): Promise<SubagentToolResul
 						...(ctx.signal ? { signal: ctx.signal } : {}),
 					});
 		const results = raws.map((r, i) => toRunResult(tasks[i]?.agent ?? "?", r));
+		const primaryArg = mode === "parallel" ? `parallel: ${tasks.length} tasks` : `chain: ${tasks.length} steps`;
 		return {
 			content: [
-				{ type: "text", text: renderMultiResult({ mode, results, planned: tasks.length, width, theme }).join("\n") },
+				{
+					type: "text",
+					text: renderMultiResult({ mode, results, planned: tasks.length, primaryArg, width, theme }).join("\n"),
+				},
 			],
 			details: {
 				mode,

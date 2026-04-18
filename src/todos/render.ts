@@ -1,50 +1,65 @@
-import { panel } from "../ui/box.js";
 import type { Theme } from "../ui/theme.js";
+import { branch, bullet, checkbox, indent, priorityMark } from "../ui/tree.js";
+import { truncateEnd } from "../ui/truncate.js";
 import type { TodoItem } from "./schema.js";
 
-export type RenderTodosPanelProps = {
+export type RenderTodosCallHeaderProps = {
+	action: string;
+	args: string;
+	theme: Theme;
+	width?: number;
+};
+
+/** One-line `●` header. Args are shown inside `()` dimmed. */
+export function renderTodosCallHeader(props: RenderTodosCallHeaderProps): string {
+	const label = `superpowers_todo(${props.action}${props.args ? ` ${props.theme.dim(props.args)}` : ""})`;
+	return bullet({ label, theme: props.theme, ...(props.width !== undefined ? { width: props.width } : {}) });
+}
+
+export type RenderTodosResultProps = {
 	items: TodoItem[];
+	action: string;
 	theme: Theme;
 	width: number;
 };
 
-function stateGlyph(item: TodoItem, theme: Theme): string {
-	if (item.status === "completed") return theme.icon("done");
-	if (item.status === "in_progress") return theme.icon("inProgress");
-	return theme.icon("pending");
-}
-
-function renderRow(item: TodoItem, theme: Theme): string {
-	const glyph = stateGlyph(item, theme);
-	const prio = item.priority === "high" ? "! " : "  ";
-	const body = item.status === "completed" ? theme.dim(item.content) : item.content;
-	return `${glyph} ${prio}${body}`;
-}
-
-export function renderTodosPanel(props: RenderTodosPanelProps): string[] {
-	const { items, theme, width } = props;
+/** Tool-result panel: `●` header + `⎿` summary line + indented checklist. */
+export function renderTodosResult(props: RenderTodosResultProps): string[] {
+	const { items, action, theme, width } = props;
+	const header = renderTodosCallHeader({ action, args: "", theme, width });
+	if (items.length === 0) {
+		return [header, branch({ text: theme.dim("no todos"), theme, width })];
+	}
 	const done = items.filter((i) => i.status === "completed").length;
-	const total = items.length;
-	const badge = total > 0 ? `${done}/${total}` : "";
-	const rows = total > 0 ? items.map((i) => renderRow(i, theme)) : [theme.dim("(no todos yet — use add)")];
-	return panel({
-		title: "Todos",
-		icon: theme.icon("todo"),
-		badge,
-		width,
-		rows,
+	const summary = branch({
+		text: `${items.length} todo${items.length === 1 ? "" : "s"} · ${done}/${items.length} done`,
 		theme,
+		width,
 	});
+	const rows = items.map((item) => {
+		const box = theme.color ? checkbox(item.status, { theme }) : checkbox(item.status, { theme, ascii: true });
+		const prio = priorityMark(item.priority, theme);
+		const prioChunk = prio ? `${theme.warn(prio)} ` : "  ";
+		const content = item.status === "completed" ? theme.dim(item.content) : item.content;
+		return truncateEnd(indent(`${box}  ${prioChunk}${content}`, 5), width);
+	});
+	return [header, summary, ...rows];
 }
 
-export type RenderTodosCallHeaderProps = {
+export type RenderTodosErrorProps = {
 	action: string;
-	count?: number;
+	message: string;
 	theme: Theme;
+	width: number;
 };
 
-export function renderTodosCallHeader(props: RenderTodosCallHeaderProps): string {
-	const { action, count, theme } = props;
-	const countStr = typeof count === "number" ? ` (${count})` : "";
-	return `${theme.icon("todo")} superpowers_todo · ${action}${countStr}`;
+/** Error result — single `●` header + single `⎿ ✗` line. */
+export function renderTodosError(props: RenderTodosErrorProps): string[] {
+	const header = renderTodosCallHeader({ action: props.action, args: "", theme: props.theme, width: props.width });
+	const errLine = branch({
+		text: `${props.theme.error("✗")} error: ${props.message}`,
+		theme: props.theme,
+		width: props.width,
+	});
+	return [header, errLine];
 }

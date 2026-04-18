@@ -63,8 +63,12 @@ export { executeSubagent } from "./subagents/tool.js";
 
 export type { TodosCommandCtx, TodosCommandHandler } from "./todos/command.js";
 export { buildTodosCommandHandler } from "./todos/command.js";
-export type { RenderTodosCallHeaderProps, RenderTodosPanelProps } from "./todos/render.js";
-export { renderTodosCallHeader, renderTodosPanel } from "./todos/render.js";
+export type {
+	RenderTodosCallHeaderProps,
+	RenderTodosErrorProps,
+	RenderTodosResultProps,
+} from "./todos/render.js";
+export { renderTodosCallHeader, renderTodosError, renderTodosResult } from "./todos/render.js";
 export type { TodoAction, TodoDetails, TodoItem, TodoPriority, TodoStatus } from "./todos/schema.js";
 export { TodoActionSchema, TodoDetailsSchema, TodoItemSchema } from "./todos/schema.js";
 export type { SessionEntryLike } from "./todos/state.js";
@@ -73,8 +77,8 @@ export type { TodosToolCtx, TodosToolResult } from "./todos/tool.js";
 export { executeTodos } from "./todos/tool.js";
 export type { BadgeKind, BadgeProps, PanelProps } from "./ui/box.js";
 export { badge, divider, panel } from "./ui/box.js";
-export type { CompactTodoProps } from "./ui/compact-todo.js";
-export { renderCompactTodo } from "./ui/compact-todo.js";
+export type { RenderTodosWidgetProps } from "./ui/compact-todo.js";
+export { renderTodosWidget } from "./ui/compact-todo.js";
 export type { ProgressBarProps, SpinnerProps } from "./ui/progress.js";
 export { progressBar, spinnerFrame } from "./ui/progress.js";
 export type { StatusCallProps } from "./ui/status.js";

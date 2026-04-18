@@ -9,59 +9,93 @@ function success(name: string, text = "ok"): RunResult {
 }
 
 describe("renderSubagentCallHeader", () => {
-	it("renders icon, agent label, and mode", () => {
-		const h = renderSubagentCallHeader({ mode: "single", agentLabel: "code-reviewer", theme });
-		expect(h).toContain("[AGENT]");
-		expect(h).toContain("code-reviewer");
-		expect(h).toContain("single");
-	});
-
-	it("appends duration and tokens when provided", () => {
-		const h = renderSubagentCallHeader({
-			mode: "single",
-			agentLabel: "x",
-			durationMs: 2345,
-			tokensSoFar: 1234,
-			theme,
-		});
-		expect(h).toContain("2.3s");
-		expect(h).toContain("1,234 tok");
+	it("renders `● superpowers_subagent(<arg>)`", () => {
+		const line = renderSubagentCallHeader({ mode: "single", primaryArg: 'code-reviewer: "review"', theme });
+		expect(line).toContain("superpowers_subagent(");
+		expect(line).toContain('code-reviewer: "review"');
 	});
 });
 
 describe("renderSingleResult", () => {
-	it("renders panel with title=agent name, ok badge, metrics footer", () => {
-		const out = renderSingleResult({ result: success("reviewer"), width: 60, theme });
-		expect(out[0]).toContain("reviewer");
-		expect(out[0]).toContain("OK");
-		expect(out.some((l) => l.includes("1.2s") && l.includes("10 in"))).toBe(true);
+	it("running → branch with running text", () => {
+		const running: RunResult = { name: "x", text: "", metrics: { inTok: 0, outTok: 0, durationMs: 800 } };
+		const lines = renderSingleResult({
+			result: running,
+			primaryArg: 'x: "t"',
+			theme,
+			width: 80,
+			running: true,
+			spinnerTick: 0,
+		});
+		expect(lines).toHaveLength(2);
+		expect((lines[1] ?? "").toLowerCase()).toContain("running");
 	});
 
-	it("shows error state", () => {
-		const out = renderSingleResult({
-			result: { name: "r", text: "", metrics: { inTok: 0, outTok: 0, durationMs: 0 }, error: "failed" },
-			width: 60,
+	it("done → branch with ✓ done · metrics + indented body", () => {
+		const lines = renderSingleResult({
+			result: success("r", "final assistant text"),
+			primaryArg: 'r: "t"',
 			theme,
+			width: 80,
 		});
-		expect(out[0]).toContain("X");
+		expect(lines.some((l) => l.includes("✓ done"))).toBe(true);
+		expect(lines.some((l) => l.includes("final assistant text"))).toBe(true);
+	});
+
+	it("error → branch with ✗ error: <msg>", () => {
+		const err: RunResult = { name: "x", text: "", metrics: { inTok: 0, outTok: 0, durationMs: 0 }, error: "boom" };
+		const lines = renderSingleResult({ result: err, primaryArg: 'x: "t"', theme, width: 80 });
+		expect(lines).toHaveLength(2);
+		expect(lines[1] ?? "").toContain("✗ error: boom");
+	});
+
+	it("cancelled → branch with ⏸ cancelled", () => {
+		const c: RunResult = { name: "x", text: "", metrics: { inTok: 0, outTok: 0, durationMs: 0 }, cancelled: true };
+		const lines = renderSingleResult({ result: c, primaryArg: 'x: "t"', theme, width: 80 });
+		expect(lines).toHaveLength(2);
+		expect((lines[1] ?? "").toLowerCase()).toContain("cancelled");
 	});
 });
 
 describe("renderMultiResult", () => {
-	it("parallel shows all rows with completed glyph and progress badge", () => {
-		const results = [success("backend"), success("frontend")];
-		const out = renderMultiResult({ mode: "parallel", results, planned: 3, width: 80, theme });
-		expect(out[0]).toContain("parallel (3)");
-		expect(out[0]).toContain("2/3");
-		expect(out.some((l) => l.includes("backend"))).toBe(true);
-		expect(out.some((l) => l.includes("queued"))).toBe(true);
+	it("parallel with all done renders N result branches + total", () => {
+		const results = [success("backend"), success("frontend"), success("tests")];
+		const lines = renderMultiResult({
+			mode: "parallel",
+			results,
+			planned: 3,
+			primaryArg: "parallel: 3 tasks",
+			theme,
+			width: 80,
+		});
+		expect(lines[0]).toContain("parallel: 3 tasks");
+		expect(lines.filter((l) => l.includes("✓")).length).toBeGreaterThanOrEqual(3);
+		expect(lines.some((l) => l.includes("total ·"))).toBe(true);
 	});
 
-	it("chain shows step order with agent names", () => {
-		const results = [success("scout"), success("planner")];
-		const out = renderMultiResult({ mode: "chain", results, planned: 3, width: 80, theme });
-		expect(out[0]).toContain("chain (3)");
-		expect(out.some((l) => l.includes("scout"))).toBe(true);
-		expect(out.some((l) => l.includes("planner"))).toBe(true);
+	it("partial (some queued) renders queued placeholder", () => {
+		const lines = renderMultiResult({
+			mode: "parallel",
+			results: [success("a")],
+			planned: 3,
+			primaryArg: "parallel: 3 tasks",
+			theme,
+			width: 80,
+		});
+		expect(lines.some((l) => l.toLowerCase().includes("queued"))).toBe(true);
+	});
+
+	it("chain renders steps in order", () => {
+		const lines = renderMultiResult({
+			mode: "chain",
+			results: [success("scout"), success("planner")],
+			planned: 3,
+			primaryArg: "chain: 3 steps",
+			theme,
+			width: 80,
+		});
+		expect(lines[0]).toContain("chain: 3 steps");
+		expect(lines.some((l) => l.includes("scout"))).toBe(true);
+		expect(lines.some((l) => l.includes("planner"))).toBe(true);
 	});
 });

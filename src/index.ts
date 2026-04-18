@@ -9,7 +9,7 @@ import { buildTodosCommandHandler } from "./todos/command.js";
 import { TodoToolParamsSchema } from "./todos/schema.js";
 import { reconstructTodos, type SessionEntryLike } from "./todos/state.js";
 import { executeTodos } from "./todos/tool.js";
-import { renderCompactTodo } from "./ui/compact-todo.js";
+import { renderTodosWidget } from "./ui/compact-todo.js";
 import { clearSuperpowersStatus, setSuperpowersStatus } from "./ui/status.js";
 import { createTheme } from "./ui/theme.js";
 import { setWidget } from "./ui/widget.js";
@@ -65,8 +65,8 @@ export default async function superpowersExtension(pi: ExtensionAPI): Promise<vo
 		if (items.length === 0) return;
 		const theme = createTheme({ color: anyCtx.ui.colorEnabled !== false });
 		const width = anyCtx.ui.width ?? 80;
-		const line = renderCompactTodo({ items, theme, width });
-		setWidget(anyCtx as never, { name: "todos", lines: [line] });
+		const widgetLines = renderTodosWidget({ items, theme, width });
+		setWidget(anyCtx as never, { name: "todos", lines: widgetLines });
 	}) as never);
 
 	pi.registerTool({

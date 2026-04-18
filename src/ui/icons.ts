@@ -1,12 +1,14 @@
-// Semantic icon tokens. Every entry MUST have an ASCII fallback.
+// Semantic icon tokens. Every entry has an ASCII fallback.
 
 export const ICONS = {
 	brand: "🦸",
 	todo: "📝",
 	agent: "🤖",
-	pending: "[ ]",
-	inProgress: "[⋯]",
-	done: "[✓]",
+	bullet: "●",
+	branch: "⎿",
+	pending: "☐",
+	inProgress: "◐",
+	done: "☒",
 	ok: "✓",
 	err: "✗",
 	warn: "⚠",
@@ -17,6 +19,8 @@ export const ASCII_FALLBACK: Record<keyof typeof ICONS, string> = {
 	brand: "[SP]",
 	todo: "[TODO]",
 	agent: "[AGENT]",
+	bullet: "*",
+	branch: "-",
 	pending: "[ ]",
 	inProgress: "[*]",
 	done: "[x]",

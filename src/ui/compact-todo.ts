@@ -1,31 +1,36 @@
 import type { TodoItem } from "../todos/schema.js";
-import { progressBar } from "./progress.js";
+import { ICONS } from "./icons.js";
 import type { Theme } from "./theme.js";
+import { checkbox, priorityMark } from "./tree.js";
 import { truncateEnd } from "./truncate.js";
 
-export type CompactTodoProps = {
+export type RenderTodosWidgetProps = {
 	items: TodoItem[];
 	theme: Theme;
 	width: number;
 };
 
-export function renderCompactTodo(props: CompactTodoProps): string {
+/**
+ * Always-visible multi-line checklist widget above the editor.
+ * Returns an empty array when items is empty (caller clears the widget).
+ */
+export function renderTodosWidget(props: RenderTodosWidgetProps): string[] {
 	const { items, theme, width } = props;
-	const total = items.length;
+	if (items.length === 0) return [];
+
+	const brand = theme.color ? ICONS.brand : "[SP]";
 	const done = items.filter((i) => i.status === "completed").length;
-	const brand = theme.icon("brand");
+	const headerText = `${brand} Todos · ${done}/${items.length} done`;
+	const lines: string[] = [truncateEnd(theme.primary(headerText), width)];
 
-	if (total === 0) return `${brand} no todos`;
+	for (const item of items) {
+		const box = theme.color ? checkbox(item.status, { theme }) : checkbox(item.status, { theme, ascii: true });
+		const prio = priorityMark(item.priority, theme);
+		const prioChunk = prio ? `${theme.warn(prio)} ` : "  ";
+		const content = item.status === "completed" ? theme.dim(item.content) : item.content;
+		const line = `   ${box}  ${prioChunk}${content}`;
+		lines.push(truncateEnd(line, width));
+	}
 
-	if (width < 40) return `${brand} ${done}/${total}`;
-
-	const inProgress = items.find((i) => i.status === "in_progress");
-	const next = inProgress ?? items.find((i) => i.status === "pending");
-	const currentText = next ? `${theme.icon(inProgress ? "inProgress" : "pending")} ${next.content}` : "all done";
-
-	const barWidth = 5;
-	const bar = progressBar({ current: done, total, width: barWidth, color: theme.color });
-	const prefix = `${brand} ${bar} ${done}/${total} · `;
-	const room = Math.max(4, width - prefix.length);
-	return prefix + truncateEnd(currentText, room);
+	return lines;
 }
