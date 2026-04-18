@@ -1,13 +1,15 @@
 import { createTheme } from "../ui/theme.js";
-import { createPickerState, onPickerKey, renderPicker, type TodoPickerKey } from "../ui/todo-picker.js";
-import type { SessionEntryLike } from "./state.js";
-import { reconstructTodos } from "./state.js";
+import { TodoPickerComponent } from "../ui/todo-picker-component.js";
+import type { TodoItem } from "./schema.js";
+import { reconstructTodos, type SessionEntryLike } from "./state.js";
 import { executeTodos, type TodosToolCtx } from "./tool.js";
 
 export type TodosCommandCtx = TodosToolCtx & {
 	ui: TodosToolCtx["ui"] & {
-		custom: (render: (state: unknown) => string[], onKey: (key: string) => unknown) => Promise<unknown>;
-		input?: (prompt: string) => Promise<string | undefined>;
+		custom?: <T>(
+			factory: (tui: unknown, theme: unknown, keybindings: unknown, done: (value: T) => void) => unknown,
+		) => Promise<T>;
+		notify?: (message: string, level?: string) => void;
 	};
 };
 
@@ -15,23 +17,21 @@ export type TodosCommandHandler = (args: string, ctx: TodosCommandCtx) => Promis
 
 export function buildTodosCommandHandler(): TodosCommandHandler {
 	return async (_args, ctx) => {
+		if (typeof ctx.ui.custom !== "function") {
+			ctx.ui.notify?.("/todos requires interactive TUI mode", "warn");
+			return;
+		}
+
 		const color = ctx.ui.colorEnabled !== false;
-		const width = ctx.ui.width ?? 80;
 		const theme = createTheme({ color });
+		const entries = ctx.sessionManager.getEntries() as SessionEntryLike[];
+		const initialItems = reconstructTodos(entries);
 
-		const prior = reconstructTodos(ctx.sessionManager.getEntries() as SessionEntryLike[]);
-		let state = createPickerState({ items: prior });
-
-		await ctx.ui.custom(
-			(_s: unknown) => renderPicker({ state, theme, width }),
-			(key: string) => {
-				const k = key as TodoPickerKey;
-				state = onPickerKey({ state, key: k });
-				return state;
-			},
+		const finalItems = await ctx.ui.custom<TodoItem[]>(
+			// biome-ignore lint/complexity/useMaxParams: pi's ctx.ui.custom factory receives 4 positional args
+			(_tui, _theme, _keybindings, done) => new TodoPickerComponent({ initialItems, theme }, done),
 		);
 
-		// After picker closes, persist via a replace action
-		executeTodos(ctx, { action: "replace", items: state.items });
+		executeTodos(ctx, { action: "replace", items: finalItems });
 	};
 }
