@@ -1,0 +1,40 @@
+{
+  "name": "pi-superpowers",
+  "version": "5.0.7",
+  "description": "Superpowers for pi — TDD, debugging, collaboration patterns, and proven techniques",
+  "keywords": ["pi-package", "superpowers", "skills", "tdd", "debugging"],
+  "license": "MIT",
+  "author": "josorio7122",
+  "repository": "github:josorio7122/pi-superpowers",
+  "type": "module",
+  "pi": {
+    "extensions": ["./src/index.ts"],
+    "skills": ["./vendor/superpowers/skills"]
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "vitest run --dir src --testNamePattern='e2e'",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check src/",
+    "lint:fix": "biome check --fix src/",
+    "format": "biome format --write src/",
+    "check": "npm run lint && npm run typecheck && npm run test",
+    "sync-upstream": "bash scripts/sync-upstream.sh"
+  },
+  "peerDependencies": {
+    "@mariozechner/pi-coding-agent": "*",
+    "pi-agents": "github:josorio7122/pi-agents"
+  },
+  "dependencies": {
+    "@sinclair/typebox": "^0.34.0",
+    "chalk": "^5.5.0",
+    "gray-matter": "^4.0.3"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.10",
+    "@types/node": "^25.5.0",
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.2"
+  }
+}

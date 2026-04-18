@@ -1,0 +1,37 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.4.9/schema.json",
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "style": {
+        "recommended": false,
+        "noNestedTernary": "error",
+        "noNonNullAssertion": "error",
+        "useImportType": "error",
+        "useFilenamingConvention": {
+          "level": "error",
+          "options": { "filenameCases": ["kebab-case"] }
+        }
+      },
+      "performance": {
+        "noBarrelFile": "error",
+        "noNamespaceImport": "error"
+      },
+      "complexity": {
+        "useMaxParams": {
+          "level": "error",
+          "options": { "max": 2 }
+        }
+      }
+    }
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "tab",
+    "lineWidth": 120
+  },
+  "files": {
+    "includes": ["src/**/*.ts"]
+  }
+}
