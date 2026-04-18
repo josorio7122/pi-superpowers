@@ -3,7 +3,10 @@ import { describe, expect, it } from "vitest";
 import { packageRoot } from "../common/paths.js";
 
 const PI_BIN = process.env.PI_BIN;
-const describeIfPi = PI_BIN ? describe : describe.skip;
+// Opt-in: set E2E_BOOTSTRAP=1 AND PI_BIN to run this slow, model-dependent check.
+// Normal test runs skip it — the injection logic is covered by inject.test.ts unit tests.
+const ENABLED = process.env.E2E_BOOTSTRAP === "1" && !!PI_BIN;
+const describeIfPi = ENABLED ? describe : describe.skip;
 
 type RunPiProps = {
 	args: string[];
