@@ -3,8 +3,10 @@
 import { buildInjectHandler } from "./bootstrap/inject.js";
 import { buildResourcesDiscoverHandler } from "./skills/discover.js";
 import { loadAgents } from "./subagents/loader.js";
+import { SubagentToolParamsSchema } from "./subagents/schema.js";
 import { executeSubagent, type PiAgentsApi } from "./subagents/tool.js";
 import { buildTodosCommandHandler } from "./todos/command.js";
+import { TodoToolParamsSchema } from "./todos/schema.js";
 import { reconstructTodos, type SessionEntryLike } from "./todos/state.js";
 import { executeTodos } from "./todos/tool.js";
 import { renderCompactTodo } from "./ui/compact-todo.js";
@@ -65,7 +67,10 @@ export default async function superpowersExtension(pi: ExtensionAPI): Promise<vo
 
 	pi.registerTool({
 		name: "superpowers_todo",
-		description: "Track session-scoped todos with replace/add/update/complete/remove/clear/list actions.",
+		label: "Todos",
+		description:
+			"Track session-scoped todos. Actions: add, replace, update, complete, remove, clear, list. See the action param schema for the shape each action expects.",
+		parameters: TodoToolParamsSchema,
 		// biome-ignore lint/complexity/useMaxParams: pi's tool execute signature is fixed at 5 params
 		execute: (_toolCallId: string, params: unknown, _signal: unknown, _onUpdate: unknown, ctx: unknown) =>
 			executeTodos(ctx as never, params),
@@ -79,8 +84,10 @@ export default async function superpowersExtension(pi: ExtensionAPI): Promise<vo
 	const { agents } = await loadAgents();
 	pi.registerTool({
 		name: "superpowers_subagent",
+		label: "Subagent",
 		description:
 			"Dispatch a named superpowers agent via pi-agents. Modes: single {agent,task}, parallel {tasks:[...]}, chain {chain:[...]}.",
+		parameters: SubagentToolParamsSchema,
 		// biome-ignore lint/complexity/useMaxParams: pi's tool execute signature is fixed at 5 params
 		execute: (_toolCallId: string, params: unknown, signal: unknown, _onUpdate: unknown, ctx: unknown) => {
 			const anyCtx = ctx as {

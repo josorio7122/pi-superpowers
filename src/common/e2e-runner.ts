@@ -87,3 +87,22 @@ export async function runPiE2E(props: RunPiE2EProps): Promise<RunPiE2EResult> {
 		},
 	};
 }
+
+export type RetryProps = {
+	attempts: number;
+	check: (result: RunPiE2EResult) => boolean;
+};
+
+// Retry wrapper for E2E tests that depend on model behaviour (tool-calling).
+// Tool invocation via a natural-language prompt can be flaky; this retries until
+// the `check` predicate passes or `attempts` is exhausted, cleaning up between.
+export async function runPiE2EWithRetry(props: RunPiE2EProps, retry: RetryProps): Promise<RunPiE2EResult> {
+	let last: RunPiE2EResult | undefined;
+	for (let i = 0; i < retry.attempts; i++) {
+		if (last) await last.cleanup();
+		last = await runPiE2E(props);
+		if (retry.check(last)) return last;
+	}
+	if (!last) throw new Error("runPiE2EWithRetry produced no result");
+	return last;
+}

@@ -44,3 +44,31 @@ export const TodoDetailsSchema = Type.Object({
 	action: Type.String(),
 });
 export type TodoDetails = Static<typeof TodoDetailsSchema>;
+
+// Flat Object schema used for pi `registerTool` parameters — OpenAI function-calling
+// requires the top-level schema to be type:"object". Strict per-action validation
+// still happens inside executeTodos via TodoActionSchema.
+export const TodoToolParamsSchema = Type.Object(
+	{
+		action: Type.Union(
+			[
+				Type.Literal("list"),
+				Type.Literal("clear"),
+				Type.Literal("replace"),
+				Type.Literal("add"),
+				Type.Literal("update"),
+				Type.Literal("complete"),
+				Type.Literal("remove"),
+			],
+			{ description: "The action to perform" },
+		),
+		items: Type.Optional(Type.Array(TodoItemSchema, { description: "Required for action=replace" })),
+		content: Type.Optional(Type.String({ description: "Required for action=add; optional for action=update" })),
+		id: Type.Optional(Type.String({ description: "Required for action=update/complete/remove" })),
+		status: Type.Optional(TodoStatusSchema),
+		priority: Type.Optional(TodoPrioritySchema),
+	},
+	{
+		description: "Track session-scoped todos. Shape of params depends on action field.",
+	},
+);

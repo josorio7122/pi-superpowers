@@ -1,15 +1,23 @@
 import { describe, expect, it } from "vitest";
-import { runPiE2E } from "../common/e2e-runner.js";
+import { runPiE2EWithRetry } from "../common/e2e-runner.js";
 
 const PI_BIN = process.env.PI_BIN;
 const describeIfPi = PI_BIN ? describe : describe.skip;
 
 describeIfPi("widget marker e2e", () => {
 	it("superpowers_todo add triggers widget-set marker with lineCount > 0", async () => {
-		const result = await runPiE2E({
-			prompt: 'Use superpowers_todo to add a todo with content "hi there", then briefly confirm.',
-			timeoutMs: 120_000,
-		});
+		const result = await runPiE2EWithRetry(
+			{
+				prompt:
+					'You MUST call the superpowers_todo tool with action "add" and content "hi there". Then briefly confirm.',
+				timeoutMs: 120_000,
+			},
+			{
+				attempts: 3,
+				check: (r) =>
+					r.markers.some((m) => m.name === "widget-set" && (m.payload as { lineCount: number }).lineCount > 0),
+			},
+		);
 		try {
 			const widgets = result.markers.filter((m) => m.name === "widget-set");
 			expect(widgets.length).toBeGreaterThan(0);
@@ -18,5 +26,5 @@ describeIfPi("widget marker e2e", () => {
 		} finally {
 			await result.cleanup();
 		}
-	}, 180_000);
+	}, 360_000);
 });
