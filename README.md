@@ -6,14 +6,19 @@ v5.1 ships the complete feature set with no feature flags: 15 skills, first-turn
 
 ## Install
 
-**pi-agents is a required peer dependency in v5.1.** Install both:
-
 ```bash
-pi install git:github.com/josorio7122/pi-agents
-pi install git:github.com/josorio7122/pi-superpowers@v5.1.0
+pi install git:github.com/josorio7122/pi-superpowers@v5.1.1
 ```
 
-If you skip pi-agents, the extension will fail to load with a clear error pointing you back here.
+`pi-agents` is bundled as a regular npm dependency — no separate install needed. If you later want to share a single pi-agents install across multiple packages, move it to your pi settings and it'll dedupe via npm.
+
+### Or run from source (dev mode)
+
+```bash
+pi -e /path/to/pi-superpowers/src/index.ts
+```
+
+The `-e` flag loads the extension directly from source with no install — great for iterating on the code.
 
 ## Features
 

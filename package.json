@@ -1,6 +1,6 @@
 {
   "name": "pi-superpowers",
-  "version": "5.1.0",
+  "version": "5.1.1",
   "description": "Superpowers for pi — TDD, debugging, collaboration patterns, and proven techniques",
   "keywords": [
     "pi-package",
@@ -34,13 +34,13 @@
     "sync-upstream": "bash scripts/sync-upstream.sh"
   },
   "peerDependencies": {
-    "@mariozechner/pi-coding-agent": "*",
-    "pi-agents": "github:josorio7122/pi-agents"
+    "@mariozechner/pi-coding-agent": "*"
   },
   "dependencies": {
     "@sinclair/typebox": "^0.34.0",
     "chalk": "^5.5.0",
-    "gray-matter": "^4.0.3"
+    "gray-matter": "^4.0.3",
+    "pi-agents": "github:josorio7122/pi-agents"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.10",
