@@ -2,14 +2,24 @@
   "name": "pi-superpowers",
   "version": "5.0.7",
   "description": "Superpowers for pi — TDD, debugging, collaboration patterns, and proven techniques",
-  "keywords": ["pi-package", "superpowers", "skills", "tdd", "debugging"],
+  "keywords": [
+    "pi-package",
+    "superpowers",
+    "skills",
+    "tdd",
+    "debugging"
+  ],
   "license": "MIT",
   "author": "josorio7122",
   "repository": "github:josorio7122/pi-superpowers",
   "type": "module",
   "pi": {
-    "extensions": ["./src/index.ts"],
-    "skills": ["./vendor/superpowers/skills"]
+    "extensions": [
+      "./src/index.ts"
+    ],
+    "skills": [
+      "./vendor/superpowers/skills"
+    ]
   },
   "scripts": {
     "test": "vitest run",
