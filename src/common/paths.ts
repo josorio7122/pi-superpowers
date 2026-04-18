@@ -24,3 +24,7 @@ export function vendorAgentsDir(): string {
 export function vendorUsingSuperpowersSkill(): string {
 	return resolve(vendorSkillsDir(), "using-superpowers", "SKILL.md");
 }
+
+export function vendorCommandsDir(): string {
+	return resolve(vendorRoot(), "commands");
+}

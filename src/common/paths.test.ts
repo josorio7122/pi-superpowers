@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { packageRoot, vendorAgentsDir, vendorSkillsDir, vendorUsingSuperpowersSkill } from "./paths.js";
+import {
+	packageRoot,
+	vendorAgentsDir,
+	vendorCommandsDir,
+	vendorRoot,
+	vendorSkillsDir,
+	vendorUsingSuperpowersSkill,
+} from "./paths.js";
 
 describe("packageRoot", () => {
 	it("resolves to an absolute directory containing package.json", () => {
@@ -20,5 +27,11 @@ describe("vendor helpers", () => {
 
 	it("vendorUsingSuperpowersSkill points at SKILL.md", () => {
 		expect(vendorUsingSuperpowersSkill().endsWith("/vendor/superpowers/skills/using-superpowers/SKILL.md")).toBe(true);
+	});
+});
+
+describe("vendorCommandsDir", () => {
+	it("resolves to <vendorRoot>/commands", () => {
+		expect(vendorCommandsDir()).toBe(`${vendorRoot()}/commands`);
 	});
 });
