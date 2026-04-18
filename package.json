@@ -1,6 +1,6 @@
 {
   "name": "pi-superpowers",
-  "version": "5.0.10",
+  "version": "5.1.0",
   "description": "Superpowers for pi — TDD, debugging, collaboration patterns, and proven techniques",
   "keywords": [
     "pi-package",
@@ -22,9 +22,10 @@
     ]
   },
   "scripts": {
-    "test": "vitest run",
+    "test": "vitest run --exclude 'src/**/*-e2e.test.ts'",
     "test:watch": "vitest",
-    "test:e2e": "vitest run --dir src --testNamePattern='e2e'",
+    "test:e2e": "vitest run src/bootstrap/inject-e2e.test.ts src/todos/todos-e2e.test.ts src/ui/status-e2e.test.ts src/ui/widget-e2e.test.ts src/skills/skill-broadcast-e2e.test.ts src/todos/picker-e2e.test.ts src/subagents/subagents-single-e2e.test.ts",
+    "test:e2e:full": "vitest run src/bootstrap/inject-e2e.test.ts src/todos/todos-e2e.test.ts src/ui/status-e2e.test.ts src/ui/widget-e2e.test.ts src/skills/skill-broadcast-e2e.test.ts src/todos/picker-e2e.test.ts src/subagents/subagents-single-e2e.test.ts src/subagents/subagents-parallel-e2e.test.ts src/subagents/subagents-chain-e2e.test.ts src/multi-session/",
     "typecheck": "tsc --noEmit",
     "lint": "biome check src/",
     "lint:fix": "biome check --fix src/",
