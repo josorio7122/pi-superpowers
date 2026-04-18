@@ -8,7 +8,6 @@ import { buildResourcesDiscoverHandler } from "./skills/discover.js";
 import { loadAgents } from "./subagents/loader.js";
 import { SubagentToolParamsSchema } from "./subagents/schema.js";
 import { executeSubagent, type PiAgentsApi } from "./subagents/tool.js";
-import { buildTodosCommandHandler } from "./todos/command.js";
 import { TodoToolParamsSchema } from "./todos/schema.js";
 import { reconstructTodos, type SessionEntryLike } from "./todos/state.js";
 import { executeTodos } from "./todos/tool.js";
@@ -89,11 +88,6 @@ export default async function superpowersExtension(pi: ExtensionAPI): Promise<vo
 		// biome-ignore lint/complexity/useMaxParams: pi's tool execute signature is fixed at 5 params
 		execute: (_toolCallId: string, params: unknown, _signal: unknown, _onUpdate: unknown, ctx: unknown) =>
 			executeTodos(ctx as never, params),
-	});
-
-	pi.registerCommand("todos", {
-		description: "Open the interactive todos picker",
-		handler: buildTodosCommandHandler(),
 	});
 
 	pi.registerTool({

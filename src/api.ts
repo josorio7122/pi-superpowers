@@ -61,8 +61,6 @@ export {
 export type { ExecuteSubagentProps, PiAgentsApi, SubagentToolCtx, SubagentToolResult } from "./subagents/tool.js";
 export { executeSubagent } from "./subagents/tool.js";
 
-export type { TodosCommandCtx, TodosCommandHandler } from "./todos/command.js";
-export { buildTodosCommandHandler } from "./todos/command.js";
 export type {
 	RenderTodosCallHeaderProps,
 	RenderTodosErrorProps,
@@ -85,16 +83,6 @@ export type { StatusCallProps } from "./ui/status.js";
 export { clearSuperpowersStatus, setSuperpowersStatus } from "./ui/status.js";
 export type { Theme, ThemeOptions } from "./ui/theme.js";
 export { createTheme } from "./ui/theme.js";
-export type {
-	PickerKeyInput,
-	RenderPickerProps,
-	TodoPickerKey,
-	TodoPickerProps,
-	TodoPickerState,
-} from "./ui/todo-picker.js";
-export { createPickerState, onPickerKey, renderPicker } from "./ui/todo-picker.js";
-export type { PiTuiComponent, TodoPickerComponentProps } from "./ui/todo-picker-component.js";
-export { mapPiKeyToTodoPickerKey, TodoPickerComponent } from "./ui/todo-picker-component.js";
 export { truncateEnd, truncateMiddle, visibleLength, wrapLines } from "./ui/truncate.js";
 export type { WidgetCallProps, WidgetName } from "./ui/widget.js";
 export { clearWidget, setWidget } from "./ui/widget.js";
