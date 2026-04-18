@@ -1,6 +1,9 @@
 // Thin pi extension entrypoint. v5.1: no feature flags; pi-agents is a hard peer dep.
 
 import { buildInjectHandler } from "./bootstrap/inject.js";
+import { buildCommandHandler } from "./commands/handler.js";
+import { loadCommands } from "./commands/loader.js";
+import { vendorRoot } from "./common/paths.js";
 import { buildResourcesDiscoverHandler } from "./skills/discover.js";
 import { loadAgents } from "./subagents/loader.js";
 import { SubagentToolParamsSchema } from "./subagents/schema.js";
@@ -47,6 +50,14 @@ export default async function superpowersExtension(pi: ExtensionAPI): Promise<vo
 
 	pi.on("before_agent_start", inject as never);
 	pi.on("resources_discover", discover as never);
+
+	const commands = await loadCommands(vendorRoot());
+	for (const cmd of commands) {
+		pi.registerCommand(cmd.name, {
+			description: cmd.description,
+			handler: buildCommandHandler(cmd) as unknown as (args: string, ctx: unknown) => Promise<void>,
+		});
+	}
 
 	pi.on("session_start", (async (_event: unknown, ctx: unknown) => {
 		setSuperpowersStatus(ctx as never, { text: "Superpowers · v5.1.0 · 15 skills · subagents" });
