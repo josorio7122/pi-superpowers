@@ -65,6 +65,24 @@ export function executeTodos(ctx: TodosToolCtx, input: unknown): TodosToolResult
 	}
 	const action = input as TodoAction;
 	const prior = reconstructTodos(ctx.sessionManager.getEntries());
+
+	// Guard: complete / update / remove are no-ops on empty state. Before this
+	// guard, a bug in reconstructTodos (v5.1.1) could silently return empty and
+	// the model would lose its list without any signal. Surface a clear error so
+	// the root cause is visible.
+	const mutating = action.action === "complete" || action.action === "update" || action.action === "remove";
+	if (mutating && prior.length === 0) {
+		return {
+			content: [
+				{
+					type: "text",
+					text: `Cannot apply '${action.action}' — no prior todos found in session. Use 'add' or 'replace' first.`,
+				},
+			],
+			details: { todos: [], action: "error" },
+		};
+	}
+
 	const todos = applyAction(prior, action);
 
 	const color = ctx.ui.colorEnabled !== false;

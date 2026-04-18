@@ -114,3 +114,37 @@ describe("executeTodos", () => {
 		expect(ctx.__widget.some(([id, lines]) => id === "superpowers-todos" && lines.length === 0)).toBe(true);
 	});
 });
+
+describe("executeTodos guards against empty state on mutating actions", () => {
+	it("returns error on complete when no prior state", () => {
+		const ctx = mockCtx();
+		const out = executeTodos(ctx, { action: "complete", id: "1" });
+		expect(out.details.action).toBe("error");
+		expect(out.content[0]?.text.toLowerCase()).toContain("no prior todos");
+	});
+
+	it("returns error on update when no prior state", () => {
+		const ctx = mockCtx();
+		const out = executeTodos(ctx, { action: "update", id: "1", status: "completed" });
+		expect(out.details.action).toBe("error");
+	});
+
+	it("returns error on remove when no prior state", () => {
+		const ctx = mockCtx();
+		const out = executeTodos(ctx, { action: "remove", id: "1" });
+		expect(out.details.action).toBe("error");
+	});
+
+	it("still allows add/replace/clear/list on empty state", () => {
+		const ctx = mockCtx();
+		expect(executeTodos(ctx, { action: "add", content: "x" }).details.action).toBe("add");
+		expect(executeTodos(mockCtx(), { action: "list" }).details.action).toBe("list");
+		expect(executeTodos(mockCtx(), { action: "clear" }).details.action).toBe("clear");
+		expect(
+			executeTodos(mockCtx(), {
+				action: "replace",
+				items: [{ id: "1", content: "y", status: "pending" }],
+			}).details.action,
+		).toBe("replace");
+	});
+});
