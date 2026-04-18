@@ -2,44 +2,59 @@
 
 [Superpowers](https://github.com/obra/superpowers) skills library as a native pi package.
 
-Wraps a vendored snapshot of `obra/superpowers` and exposes its 15 skills to the `pi` coding agent. Injects the `using-superpowers` discipline on the first turn of every pi session, plus a pi-specific tool-mapping addendum so skills written for Claude Code work naturally on pi.
+Wraps a vendored snapshot of `obra/superpowers` and exposes its 15 skills to the `pi` coding agent, plus a session-scoped todos tool. Updates are a single `./scripts/sync-upstream.sh vX.Y.Z` command — zero merge conflicts because we don't edit upstream files.
 
 ## Install
 
 ```bash
-pi install git:github.com/josorio7122/pi-agents
-pi install git:github.com/josorio7122/pi-superpowers@v5.0.7
+pi install git:github.com/josorio7122/pi-superpowers@v5.0.10
 ```
 
-## What you get
+(If you later enable experimental subagents, also install `git:github.com/josorio7122/pi-agents`.)
 
-- **15 superpowers skills** discoverable via `/skill:name` (e.g. `/skill:brainstorming`, `/skill:writing-plans`, `/skill:test-driven-development`).
-- **First-turn bootstrap** that injects the `using-superpowers` skill content + a pi tool-mapping addendum (maps `TodoWrite` → `superpowers_todo`, `Task` → `superpowers_subagent`, `Read/Write/Edit/Bash` → pi natives).
-- **Session-start status** `🦸 Superpowers · v5.0.7 · 15 skills` that auto-clears after 3 seconds.
-- **Reusable `ui/` component library** (theme, icons, box, progress, truncate, status, widget) used by the todo and subagent features shipping in v5.0.8 / v5.0.9.
+## Shipped in v5.0.10
+
+| Feature | Status |
+|---|---|
+| **15 superpowers skills** discoverable via `/skill:name` (brainstorming, writing-plans, TDD, debugging, code-review, etc.) | ✅ fully functional, E2E verified |
+| **First-turn bootstrap** — injects full `using-superpowers` content + pi tool-mapping addendum on every new pi session | ✅ fully functional, E2E verified |
+| **`superpowers_todo` tool** — add / replace / update / complete / remove / clear / list, state reconstructed from session entries, persistent widget above editor | ✅ fully functional, E2E verified |
+| **Top-tier `ui/` component library** — theme, icons, box, progress, truncate, status, widget, with ASCII fallback and width-responsive rendering | ✅ 150+ unit tests, snapshot-verified |
+| **Session-start status** — `🦸 Superpowers · v5.0.10 · 15 skills` flash on start | ✅ |
+| **`sync-upstream.sh`** — atomic snapshot of `obra/superpowers` at any tag | ✅ |
+
+## Deferred to v5.1 (feature-flagged off)
+
+| Feature | Flag | Reason |
+|---|---|---|
+| `superpowers_subagent` tool (single/parallel/chain via pi-agents) | `SUPERPOWERS_SUBAGENT_ENABLED=1` | pi-agents `runAgent` requires a structured `AgentConfig` + `modelRegistry` / `sessionDir` / `conversationLogPath` sourcing from pi runtime. Proper integration design lives in [`docs/specs/2026-04-23-subagents-v5.1-design.md`](docs/specs/2026-04-23-subagents-v5.1-design.md). |
+| `/todos` interactive picker | `SUPERPOWERS_TODOS_PICKER_ENABLED=1` | pi's `ctx.ui.custom` expects a `pi-tui` Component object, not our string-array render. Real Component implementation coming in v5.1. |
+
+Both features have unit-test coverage (150+ tests) for their pure logic; wiring to pi's runtime is what ships in v5.1.
 
 ## Updating superpowers
 
-When `obra/superpowers` releases a new version:
+When `obra/superpowers` tags a new release:
 
 ```bash
-./scripts/sync-upstream.sh v5.0.8
-npm run check
-git add -A && git commit -m "Sync superpowers to v5.0.8"
-git tag v5.0.8 && git push --follow-tags
+./scripts/sync-upstream.sh v5.0.11   # atomic rsync into vendor/superpowers/ + bump package.json
+npm run check                         # lint + typecheck + unit tests
+PI_BIN=$(which pi) npx vitest run     # also runs E2E against real pi
+git add -A && git commit -m "Sync superpowers to v5.0.11"
+git tag v5.0.11 && git push --follow-tags
 ```
 
-The sync script does an atomic rsync of the upstream repo into `vendor/superpowers/`, bumps `package.json` to match, and stamps the ref in `vendor/superpowers/.synced-ref`. If anything goes wrong, `vendor/superpowers/` is left untouched.
+Zero merge conflicts guaranteed — `src/` never edits `vendor/superpowers/`.
 
 ## Development
 
 ```bash
-npm run check          # lint + typecheck + test (~50 unit tests)
+npm run check          # lint + typecheck + 150 unit tests
 npm run test:watch     # vitest in watch mode
-PI_BIN=$(which pi) npm run test:e2e   # runs pi subprocess e2e test
+PI_BIN=$(which pi) npx vitest run src/bootstrap/inject-e2e.test.ts src/todos/todos-e2e.test.ts
 ```
 
-The tests mirror pi-agents conventions exactly: biome with `kebab-case` filenames, `noBarrelFile`, `useMaxParams: 2`; vitest with co-located `*.test.ts`; strict TypeScript with `noUncheckedIndexedAccess` and `exactOptionalPropertyTypes`.
+Conventions mirrored from pi-agents: biome with kebab-case filenames, `noBarrelFile`, `useMaxParams: 2`; strict TypeScript with `noUncheckedIndexedAccess` and `exactOptionalPropertyTypes`; co-located `*.test.ts` next to every module.
 
 ## Architecture
 
@@ -47,13 +62,7 @@ See [`docs/specs/2026-04-18-pi-superpowers-design.md`](docs/specs/2026-04-18-pi-
 
 - **`vendor/superpowers/`** — read-only snapshot of `obra/superpowers`, refreshed only by the sync script.
 - **`src/`** — thin pi adapter, feature-organized (bootstrap, skills, todos, subagents, ui, compat, common).
-- **Versioning** — `pi-superpowers@v5.0.7` wraps `obra/superpowers@v5.0.7` exactly. `pi list` shows the upstream version directly.
-
-## Roadmap
-
-- **v5.0.7 (this release)** — skills discovery + first-turn bootstrap + ui primitives.
-- **v5.0.8 (next)** — `superpowers_todo` tool + interactive `/todos` picker.
-- **v5.0.9** — `superpowers_subagent` tool with single/parallel/chain modes via pi-agents.
+- **Versioning** — `pi-superpowers@vX.Y.Z` wraps `obra/superpowers@vX.Y.Z` exactly. `pi list` shows upstream version directly.
 
 ## License
 

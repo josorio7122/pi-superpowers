@@ -31,10 +31,42 @@ export type InjectResult = {
 
 export type InjectHandler = (event: InjectEvent, ctx: InjectCtx) => Promise<InjectResult | undefined>;
 
+// Sentinel the E2E test looks for — proves before_agent_start fired and we
+// returned a message on the first turn. Emitted on stderr because pi's
+// setStatus/setWidget/notify are no-ops in print+JSON mode (per pi docs).
+export const BOOTSTRAP_INJECTION_MARKER = "superpowers-bootstrap-injected";
+
+function alreadyInjected(entries: unknown[]): boolean {
+	// Look for a prior bootstrap message in session history. Matches on either
+	// a stored `customType` field or the sentinel text embedded in `content`.
+	for (const entry of entries) {
+		if (typeof entry !== "object" || entry === null) continue;
+		const asRec = entry as Record<string, unknown>;
+		if (asRec.customType === "superpowers-bootstrap") return true;
+		const content = asRec.content;
+		if (typeof content === "string" && content.includes("You have superpowers")) return true;
+	}
+	return false;
+}
+
 export function buildInjectHandler(opts: InjectOptions): InjectHandler {
 	const skillPath = opts.usingSkillPath ?? vendorUsingSuperpowersSkill();
 	return async (_event, ctx) => {
-		if (ctx.sessionManager.getEntries().length > 0) return undefined;
+		const entries = ctx.sessionManager.getEntries();
+		if (alreadyInjected(entries)) return undefined;
+
+		// Observable side-effect for E2E tests only. ctx.ui.setStatus/setWidget/notify
+		// are no-ops in --mode json -p AND extension stderr is buffered by pi's process
+		// tree. A file write is the only reliable signal. No-op unless the test env var
+		// is set, so production pi sessions never touch the filesystem here.
+		if (process.env.SUPERPOWERS_MARKER_FILE) {
+			try {
+				const { writeFile } = await import("node:fs/promises");
+				await writeFile(process.env.SUPERPOWERS_MARKER_FILE, `${BOOTSTRAP_INJECTION_MARKER}\n${Date.now()}\n`);
+			} catch {
+				// Never let logging break injection.
+			}
+		}
 
 		const skillBody = await readFileSafe(skillPath);
 		const addendum = renderPiAddendum({ subagentAvailable: opts.subagentAvailable });

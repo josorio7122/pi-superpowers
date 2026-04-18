@@ -1,4 +1,15 @@
 // Thin pi extension entrypoint. Registers event handlers, tools, and commands.
+//
+// Feature-flag gates (v5.0.10):
+// - SUPERPOWERS_SUBAGENT_ENABLED=1    → register superpowers_subagent tool.
+//                                        Requires pi-agents v5.1 integration adapter (see
+//                                        docs/specs/2026-04-23-subagents-v5.1-design.md).
+//                                        Off by default; v5.0.10 does not ship the adapter.
+// - SUPERPOWERS_TODOS_PICKER_ENABLED=1 → register /todos interactive command.
+//                                        Requires a pi-tui Component implementation
+//                                        (see v5.1 design). Off by default; v5.0.10 only
+//                                        ships the superpowers_todo tool itself (fully
+//                                        functional), not the interactive picker command.
 
 import { buildInjectHandler } from "./bootstrap/inject.js";
 import { buildResourcesDiscoverHandler } from "./skills/discover.js";
@@ -21,10 +32,6 @@ type PiAgentsModule = {
 
 async function loadPiAgents(): Promise<PiAgentsModule | null> {
 	try {
-		// Import via `as unknown` — pi-agents' runAgent has a richer signature than we model;
-		// a production integration will adapt AgentConfig in a follow-up. For now the tool
-		// is gated behind the presence of `runAgent` but we do not attempt to call it from
-		// auto-registered code paths without that adapter. Tests inject a mock.
 		const mod = (await import("pi-agents")) as unknown as { runAgent?: RunAgentFn };
 		if (typeof mod.runAgent !== "function") return null;
 		return { runAgent: mod.runAgent };
@@ -33,8 +40,13 @@ async function loadPiAgents(): Promise<PiAgentsModule | null> {
 	}
 }
 
+function flagEnabled(name: string): boolean {
+	return process.env[name] === "1";
+}
+
 export default async function superpowersExtension(pi: ExtensionAPI): Promise<void> {
-	const piAgents = await loadPiAgents();
+	const subagentFlagEnabled = flagEnabled("SUPERPOWERS_SUBAGENT_ENABLED");
+	const piAgents = subagentFlagEnabled ? await loadPiAgents() : null;
 	const subagentAvailable = piAgents !== null;
 
 	const inject = buildInjectHandler({ subagentAvailable });
@@ -45,7 +57,7 @@ export default async function superpowersExtension(pi: ExtensionAPI): Promise<vo
 
 	pi.on("session_start", (async (_event: unknown, ctx: unknown) => {
 		const variant = subagentAvailable ? "15 skills · subagents" : "15 skills";
-		setSuperpowersStatus(ctx as never, { text: `Superpowers · v5.0.9 · ${variant}` });
+		setSuperpowersStatus(ctx as never, { text: `Superpowers · v5.0.10 · ${variant}` });
 		setTimeout(() => {
 			clearSuperpowersStatus(ctx as never);
 		}, 3000);
@@ -59,12 +71,15 @@ export default async function superpowersExtension(pi: ExtensionAPI): Promise<vo
 			executeTodos(ctx as never, params),
 	});
 
-	pi.registerCommand("todos", {
-		description: "Open the interactive todos picker",
-		handler: buildTodosCommandHandler(),
-	});
+	if (flagEnabled("SUPERPOWERS_TODOS_PICKER_ENABLED")) {
+		// Interactive /todos command — requires pi-tui Component implementation (v5.1).
+		pi.registerCommand("todos", {
+			description: "Open the interactive todos picker",
+			handler: buildTodosCommandHandler(),
+		});
+	}
 
-	if (piAgents) {
+	if (subagentFlagEnabled && piAgents) {
 		const { agents } = await loadAgents();
 		pi.registerTool({
 			name: "superpowers_subagent",

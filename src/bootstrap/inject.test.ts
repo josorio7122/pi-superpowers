@@ -13,10 +13,10 @@ async function fixtureSkill(body: string): Promise<string> {
 	return skillPath;
 }
 
-function mockCtx(entryCount: number) {
+function mockCtx(entries: unknown[] = []) {
 	return {
 		sessionManager: {
-			getEntries: () => new Array(entryCount).fill({ kind: "user" }),
+			getEntries: () => entries,
 		},
 		ui: {
 			notify: (_m: string, _l?: string) => undefined,
@@ -25,14 +25,24 @@ function mockCtx(entryCount: number) {
 	};
 }
 
+const priorBootstrapEntry = {
+	customType: "superpowers-bootstrap",
+	content: "<EXTREMELY_IMPORTANT>\nYou have superpowers.\n…",
+};
+
 describe("buildInjectHandler", () => {
-	it("injects a persistent message on first turn", async () => {
+	it("injects a persistent message on first turn (only the user prompt in session)", async () => {
 		const skillPath = await fixtureSkill("# using-superpowers\n\nBody content");
 		const handler = buildInjectHandler({
 			usingSkillPath: skillPath,
 			subagentAvailable: true,
 		});
-		const out = await handler({ prompt: "hi", images: [], systemPrompt: "" }, mockCtx(0));
+		// before_agent_start fires AFTER user prompt is entered, so entries is non-empty
+		// on the first turn. Detection must not rely on length === 0.
+		const out = await handler(
+			{ prompt: "hi", images: [], systemPrompt: "" },
+			mockCtx([{ role: "user", content: "hi" }]),
+		);
 		expect(out?.message).toBeDefined();
 		expect(out?.message?.content).toContain("using-superpowers");
 		expect(out?.message?.content).toContain("Body content");
@@ -41,16 +51,22 @@ describe("buildInjectHandler", () => {
 		expect(out?.message?.display).toBe(false);
 	});
 
-	it("returns undefined on subsequent turns (entries > 0)", async () => {
+	it("returns undefined on subsequent turns (prior bootstrap message in history)", async () => {
 		const skillPath = await fixtureSkill("# x");
 		const handler = buildInjectHandler({ usingSkillPath: skillPath, subagentAvailable: true });
-		const out = await handler({ prompt: "hi", images: [], systemPrompt: "" }, mockCtx(3));
+		const out = await handler(
+			{ prompt: "hi again", images: [], systemPrompt: "" },
+			mockCtx([priorBootstrapEntry, { role: "user", content: "first" }, { role: "user", content: "hi again" }]),
+		);
 		expect(out).toBeUndefined();
 	});
 
 	it("injects only the addendum if skill file missing", async () => {
 		const handler = buildInjectHandler({ usingSkillPath: "/nope/x.md", subagentAvailable: true });
-		const out = await handler({ prompt: "hi", images: [], systemPrompt: "" }, mockCtx(0));
+		const out = await handler(
+			{ prompt: "hi", images: [], systemPrompt: "" },
+			mockCtx([{ role: "user", content: "hi" }]),
+		);
 		expect(out?.message?.content).toContain("| `Read` | `read` |");
 		expect(out?.message?.content.toLowerCase()).toContain("could not load");
 	});

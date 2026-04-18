@@ -48,16 +48,17 @@
 - [ ] Assert stdout JSON stream contains a `toolCall` for `superpowers_todo` AND a tool result with details that include `"write tests"`.
 - [ ] Gate behind `PI_BIN` presence (no opt-in flag — must work).
 
-## Task 3: Verify `/todos` command against real `ctx.ui.custom`
+## Task 3: Feature-flag OFF `/todos` interactive command
 
-**Problem:** I guessed `ctx.ui.custom(render, onKey)` signature without reading pi's docs.
+**Problem:** pi's real `ctx.ui.custom` signature is `<T>((tui, theme, keybindings, done) => pi-tui Component)` — my command uses `(render, onKey)`. Completely different API shape. Interactive TUI requires building a `pi-tui` Component object (not string-array renders). This is significant integration work deserving v5.1 design, not a rushed fix.
 
-**Files:** Read pi docs, modify `src/todos/command.ts` if signature is different.
+**Decision:** Feature-flag off `/todos` command registration. Picker FSM logic (`src/ui/todo-picker.ts`) stays in place — it's pure, tested, and will power the real integration later. `superpowers_todo` tool itself still works — the model can call it, state persists, widget renders. Only the human-interactive `/todos` slash command is deferred.
 
-- [ ] Read `/Users/josorio/Library/pnpm/global/5/node_modules/@mariozechner/pi-coding-agent/docs/extensions.md` sections on `ctx.ui.custom`.
-- [ ] If signature differs, adjust `src/todos/command.ts` and its tests.
-- [ ] Run `/todos` in a real pi session (manual smoke), paste keystrokes j/k/space/a/test/q, verify behavior works or report findings.
-- [ ] Update tests if the shape needed adjustment.
+**Files:** Modify `src/index.ts`.
+
+- [ ] Gate `pi.registerCommand("todos", …)` behind `process.env.SUPERPOWERS_TODOS_PICKER_ENABLED === "1"`.
+- [ ] When unset (default), command is not registered.
+- [ ] Add a comment pointing at `docs/specs/2026-04-23-subagents-v5.1-design.md` which will also cover proper `/todos` integration.
 
 ## Task 4: Verify widget rendering in real pi
 
