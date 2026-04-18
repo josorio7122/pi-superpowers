@@ -5,3 +5,6 @@ dist/
 vendor/superpowers.staging/
 coverage/
 .vitest-cache/
+# Subagent knowledge stubs created at runtime under sessionDir
+superpowers/
+.pi/
