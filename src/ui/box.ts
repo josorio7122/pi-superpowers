@@ -10,10 +10,6 @@ export type PanelProps = {
 	theme: Theme;
 };
 
-export function divider(width: number, char = "─"): string {
-	return char.repeat(Math.max(0, width));
-}
-
 export function panel(props: PanelProps): string[] {
 	const { title, icon, badge: badgeText, width, rows, theme } = props;
 	const innerWidth = Math.max(4, width - 2);
@@ -39,23 +35,4 @@ export function panel(props: PanelProps): string[] {
 
 	const bottom = `└${"─".repeat(innerWidth)}┘`;
 	return [top, ...body, bottom];
-}
-
-export type BadgeKind = "success" | "warn" | "error" | "info";
-
-export type BadgeProps = {
-	kind: BadgeKind;
-	text: string;
-	theme: Theme;
-};
-
-export function badge(props: BadgeProps): string {
-	const { kind, text, theme } = props;
-	const paints = {
-		success: theme.success,
-		warn: theme.warn,
-		error: theme.error,
-		info: theme.accent,
-	} as const;
-	return paints[kind](`[${text}]`);
 }

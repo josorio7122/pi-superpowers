@@ -1,14 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { badge, divider, panel } from "./box.js";
+import { panel } from "./box.js";
 import { createTheme } from "./theme.js";
 
 const theme = createTheme({ color: false });
-
-describe("divider", () => {
-	it("returns a line of given width", () => {
-		expect(divider(5)).toBe("─────");
-	});
-});
 
 describe("panel", () => {
 	it("renders a box with title and body rows", () => {
@@ -38,14 +32,5 @@ describe("panel", () => {
 		const bodyLine = out.find((l) => l.includes("this"));
 		expect(bodyLine).toBeDefined();
 		if (bodyLine) expect(bodyLine.length).toBeLessThanOrEqual(20);
-	});
-});
-
-describe("badge", () => {
-	it("renders success badge", () => {
-		expect(badge({ kind: "success", text: "OK", theme })).toContain("OK");
-	});
-	it("renders error badge", () => {
-		expect(badge({ kind: "error", text: "FAIL", theme })).toContain("FAIL");
 	});
 });

@@ -3,7 +3,6 @@
 export const ICONS = {
 	brand: "🦸",
 	todo: "📝",
-	agent: "🤖",
 	bullet: "●",
 	branch: "⎿",
 	pending: "☐",
@@ -11,14 +10,11 @@ export const ICONS = {
 	done: "☒",
 	ok: "✓",
 	err: "✗",
-	warn: "⚠",
-	paused: "⏸",
 } as const;
 
 export const ASCII_FALLBACK: Record<keyof typeof ICONS, string> = {
 	brand: "[SP]",
 	todo: "[TODO]",
-	agent: "[AGENT]",
 	bullet: "*",
 	branch: "-",
 	pending: "[ ]",
@@ -26,8 +22,6 @@ export const ASCII_FALLBACK: Record<keyof typeof ICONS, string> = {
 	done: "[x]",
 	ok: "OK",
 	err: "X",
-	warn: "!",
-	paused: "||",
 };
 
 export const SPINNER_FRAMES = ["⣾", "⣽", "⣻", "⢿", "⡿", "⣟", "⣯", "⣷"] as const;
