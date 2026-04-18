@@ -6,6 +6,7 @@ import { renderPiAddendum } from "./addendum.js";
 export type InjectOptions = {
 	usingSkillPath?: string;
 	subagentAvailable: boolean;
+	availableAgents?: string[];
 };
 
 export type InjectEvent = {
@@ -52,7 +53,10 @@ export function buildInjectHandler(opts: InjectOptions): InjectHandler {
 		await writeMarker("bootstrap-inject", {});
 
 		const skillBody = await readFileSafe(skillPath);
-		const addendum = renderPiAddendum({ subagentAvailable: opts.subagentAvailable });
+		const addendum = renderPiAddendum({
+			subagentAvailable: opts.subagentAvailable,
+			...(opts.availableAgents ? { availableAgents: opts.availableAgents } : {}),
+		});
 
 		const skillSection = skillBody
 			? skillBody

@@ -24,3 +24,38 @@ describe("renderPiAddendum", () => {
 		expect(text.toLowerCase()).not.toContain("unavailable");
 	});
 });
+
+describe("renderPiAddendum lists available agent names", () => {
+	it("includes agent names when provided", () => {
+		const text = renderPiAddendum({
+			subagentAvailable: true,
+			availableAgents: ["code-reviewer", "general-purpose"],
+		});
+		expect(text).toContain("code-reviewer");
+		expect(text).toContain("general-purpose");
+		expect(text.toLowerCase()).toContain("available");
+	});
+
+	it("mentions the prompt-template pattern when general-purpose is available", () => {
+		const text = renderPiAddendum({
+			subagentAvailable: true,
+			availableAgents: ["code-reviewer", "general-purpose"],
+		});
+		expect(text.toLowerCase()).toContain("prompt template");
+	});
+
+	it("does not mention prompt-template pattern when general-purpose is absent", () => {
+		const text = renderPiAddendum({
+			subagentAvailable: true,
+			availableAgents: ["code-reviewer"],
+		});
+		expect(text.toLowerCase()).not.toContain("prompt template");
+	});
+
+	it("omits the agent-list section when availableAgents is empty or undefined", () => {
+		expect(renderPiAddendum({ subagentAvailable: true }).toLowerCase()).not.toContain("available agents");
+		expect(renderPiAddendum({ subagentAvailable: true, availableAgents: [] }).toLowerCase()).not.toContain(
+			"available agents",
+		);
+	});
+});

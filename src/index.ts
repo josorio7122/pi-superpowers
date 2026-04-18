@@ -37,8 +37,12 @@ async function loadPiAgents(): Promise<PiAgentsApi> {
 
 export default async function superpowersExtension(pi: ExtensionAPI): Promise<void> {
 	const piAgentsApi = await loadPiAgents();
+	const { agents } = await loadAgents();
 
-	const inject = buildInjectHandler({ subagentAvailable: true });
+	const inject = buildInjectHandler({
+		subagentAvailable: true,
+		availableAgents: agents.map((a) => a.name),
+	});
 	const discover = buildResourcesDiscoverHandler();
 
 	pi.on("before_agent_start", inject as never);
@@ -81,7 +85,6 @@ export default async function superpowersExtension(pi: ExtensionAPI): Promise<vo
 		handler: buildTodosCommandHandler(),
 	});
 
-	const { agents } = await loadAgents();
 	pi.registerTool({
 		name: "superpowers_subagent",
 		label: "Subagent",
