@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createTheme } from "../ui/theme.js";
-import type { RunResult } from "./dispatch.js";
-import { renderMultiResult, renderSingleResult, renderSubagentCallHeader } from "./render.js";
+import { type RunResult, renderMultiResult, renderSingleResult, renderSubagentCallHeader } from "./render.js";
 
 const theme = createTheme({ color: false });
 

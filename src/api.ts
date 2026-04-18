@@ -18,13 +18,17 @@ export { renderToolMappingMarkdown, TOOL_MAPPING } from "./compat/tool-mapping.j
 export type { DiscoverHandler, DiscoverOptions } from "./skills/discover.js";
 export { buildResourcesDiscoverHandler } from "./skills/discover.js";
 
-export type { RunAgentFn, RunMetrics, RunResult } from "./subagents/dispatch.js";
-export { aggregateMetrics, dispatchChain, dispatchParallel, dispatchSingle } from "./subagents/dispatch.js";
 export type { AgentFrontmatterLike } from "./subagents/frontmatter.js";
 export { parseAgentMarkdown } from "./subagents/frontmatter.js";
 export type { LoadAgentsOptions, LoadedAgents } from "./subagents/loader.js";
 export { findAgent, loadAgents } from "./subagents/loader.js";
-export type { CallHeaderProps, RenderMultiProps, RenderSingleProps } from "./subagents/render.js";
+export type {
+	CallHeaderProps,
+	RenderMultiProps,
+	RenderSingleProps,
+	RunMetrics,
+	RunResult,
+} from "./subagents/render.js";
 export { renderMultiResult, renderSingleResult, renderSubagentCallHeader } from "./subagents/render.js";
 export type {
 	ChainSubagent,
@@ -40,8 +44,7 @@ export {
 	SingleSubagentSchema,
 	SubagentInputSchema,
 } from "./subagents/schema.js";
-export type { ExecuteSubagentProps, SubagentToolCtx, SubagentToolResult } from "./subagents/tool.js";
-export { executeSubagent } from "./subagents/tool.js";
+export type { SubagentToolCtx, SubagentToolResult } from "./subagents/tool.js";
 export type { BuildRunConfigProps, RunConfig } from "./subagents/transform.js";
 export { buildRunConfig } from "./subagents/transform.js";
 export type { TodosCommandCtx, TodosCommandHandler } from "./todos/command.js";

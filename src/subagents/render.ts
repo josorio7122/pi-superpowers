@@ -1,8 +1,23 @@
 import { panel } from "../ui/box.js";
 import { spinnerFrame } from "../ui/progress.js";
 import type { Theme } from "../ui/theme.js";
-import type { RunMetrics, RunResult } from "./dispatch.js";
 import type { SubagentMode } from "./schema.js";
+
+export type RunMetrics = {
+	inTok: number;
+	outTok: number;
+	durationMs: number;
+	usd?: number;
+	toolCalls?: number;
+};
+
+export type RunResult = {
+	name: string;
+	text: string;
+	metrics: RunMetrics;
+	cancelled?: boolean;
+	error?: string;
+};
 
 export type CallHeaderProps = {
 	mode: SubagentMode;
