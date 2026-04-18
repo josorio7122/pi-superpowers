@@ -17,7 +17,6 @@ async function mockCtx() {
 		cwd: "/tmp/cwd",
 		sessionDir,
 		modelRegistry: {} as never,
-		modelId: "anthropic/claude-sonnet-4-5",
 	};
 }
 

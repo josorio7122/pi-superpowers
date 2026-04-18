@@ -95,7 +95,6 @@ export default async function superpowersExtension(pi: ExtensionAPI): Promise<vo
 				cwd: string;
 				sessionManager: { getSessionDir: () => string };
 				modelRegistry: unknown;
-				model?: { id: string };
 			};
 			return executeSubagent({
 				input: params,
@@ -106,7 +105,6 @@ export default async function superpowersExtension(pi: ExtensionAPI): Promise<vo
 					cwd: anyCtx.cwd,
 					sessionDir: anyCtx.sessionManager.getSessionDir(),
 					modelRegistry: anyCtx.modelRegistry,
-					modelId: anyCtx.model?.id,
 					...(signal instanceof AbortSignal ? { signal } : {}),
 				},
 			});

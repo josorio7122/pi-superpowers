@@ -14,7 +14,7 @@ function upstream(overrides: Partial<AgentFrontmatterLike> = {}): AgentFrontmatt
 }
 
 async function ctx(): Promise<BuildCtx> {
-	return { sessionDir: await tmpSession(), modelId: "anthropic/claude-sonnet-4-5" };
+	return { sessionDir: await tmpSession() };
 }
 
 describe("buildAgentConfig defaults", () => {
@@ -58,18 +58,45 @@ describe("buildAgentConfig model resolution", () => {
 		expect(cfg.frontmatter.model).toBe("anthropic/claude-opus-4");
 	});
 
-	it("resolves 'inherit' to ctx.modelId", async () => {
+	it("resolves 'inherit' to pinned default openai-codex/gpt-5.4 (NOT ctx.modelId)", async () => {
 		const cfg = await buildAgentConfig(upstream({ model: "inherit" }), await ctx());
-		expect(cfg.frontmatter.model).toBe("anthropic/claude-sonnet-4-5");
+		expect(cfg.frontmatter.model).toBe("openai-codex/gpt-5.4");
 	});
 
-	it("throws when 'inherit' and ctx.modelId is undefined", async () => {
-		await expect(
-			buildAgentConfig(upstream({ model: "inherit" }), {
-				sessionDir: await tmpSession(),
-				modelId: undefined,
-			}),
-		).rejects.toThrow(/cannot resolve 'inherit'/i);
+	it("resolves missing upstream model to pinned default", async () => {
+		const cfg = await buildAgentConfig(upstream(), await ctx());
+		expect(cfg.frontmatter.model).toBe("openai-codex/gpt-5.4");
+	});
+
+	it("SUPERPOWERS_AGENT_MODEL env var overrides pinned default", async () => {
+		process.env.SUPERPOWERS_AGENT_MODEL = "anthropic/claude-sonnet-4-5";
+		try {
+			const cfg = await buildAgentConfig(upstream({ model: "inherit" }), await ctx());
+			expect(cfg.frontmatter.model).toBe("anthropic/claude-sonnet-4-5");
+		} finally {
+			delete process.env.SUPERPOWERS_AGENT_MODEL;
+		}
+	});
+
+	it("SUPERPOWERS_AGENT_MODEL env var overrides explicit upstream model too", async () => {
+		process.env.SUPERPOWERS_AGENT_MODEL = "anthropic/claude-opus-4";
+		try {
+			const cfg = await buildAgentConfig(upstream({ model: "openai-codex/gpt-4o" }), await ctx());
+			expect(cfg.frontmatter.model).toBe("anthropic/claude-opus-4");
+		} finally {
+			delete process.env.SUPERPOWERS_AGENT_MODEL;
+		}
+	});
+
+	it("throws on invalid SUPERPOWERS_AGENT_MODEL format", async () => {
+		process.env.SUPERPOWERS_AGENT_MODEL = "bogus";
+		try {
+			await expect(buildAgentConfig(upstream({ model: "inherit" }), await ctx())).rejects.toThrow(
+				/invalid SUPERPOWERS_AGENT_MODEL/i,
+			);
+		} finally {
+			delete process.env.SUPERPOWERS_AGENT_MODEL;
+		}
 	});
 
 	it("throws when upstream model doesn't match provider/model format and isn't 'inherit'", async () => {
@@ -80,7 +107,7 @@ describe("buildAgentConfig model resolution", () => {
 describe("buildAgentConfig knowledge stubs", () => {
 	it("creates knowledge stub files under sessionDir/superpowers/", async () => {
 		const sessionDir = await tmpSession();
-		const cfg = await buildAgentConfig(upstream(), { sessionDir, modelId: "anthropic/claude-sonnet-4-5" });
+		const cfg = await buildAgentConfig(upstream(), { sessionDir });
 		const projectPath = cfg.frontmatter.knowledge.project.path;
 		const generalPath = cfg.frontmatter.knowledge.general.path;
 		expect(projectPath.startsWith(sessionDir)).toBe(true);

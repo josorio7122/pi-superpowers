@@ -27,20 +27,25 @@ export type PiAgentConfig = {
 
 export type BuildCtx = {
 	sessionDir: string;
-	modelId: string | undefined;
 };
 
 const DEFAULT_TOOLS = ["read", "write", "edit", "bash", "grep", "glob"];
 const MODEL_FORMAT = /^.+\/.+$/;
+const PINNED_DEFAULT_MODEL = "openai-codex/gpt-5.4";
 
-function resolveModel(upstream: string | undefined, modelId: string | undefined): string {
-	const value = upstream ?? "inherit";
-	if (value === "inherit") {
-		if (!modelId) {
-			throw new Error("cannot resolve 'inherit' model — ctx.model is undefined");
+function resolveModel(upstream: string | undefined): string {
+	// Env var overrides everything.
+	const override = process.env.SUPERPOWERS_AGENT_MODEL;
+	if (override) {
+		if (!MODEL_FORMAT.test(override)) {
+			throw new Error(`invalid SUPERPOWERS_AGENT_MODEL '${override}' — expected 'provider/model' format`);
 		}
-		return modelId;
+		return override;
 	}
+	// Upstream 'inherit' or missing → pinned default.
+	const value = upstream ?? "inherit";
+	if (value === "inherit") return PINNED_DEFAULT_MODEL;
+	// Explicit upstream must be valid 'provider/model'.
 	if (!MODEL_FORMAT.test(value)) {
 		throw new Error(`invalid model '${value}' — expected 'provider/model' format`);
 	}
@@ -61,7 +66,7 @@ export async function buildAgentConfig(upstream: AgentFrontmatterLike, ctx: Buil
 	await ensureStubFile(generalPath, `General knowledge for ${upstream.name}`);
 
 	const tools = upstream.tools && upstream.tools.length > 0 ? upstream.tools : DEFAULT_TOOLS;
-	const model = resolveModel(upstream.model, ctx.modelId);
+	const model = resolveModel(upstream.model);
 	const description = upstream.description ?? upstream.name;
 
 	return {

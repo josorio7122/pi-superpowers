@@ -31,7 +31,6 @@ export type SubagentToolCtx = {
 	cwd: string;
 	sessionDir: string;
 	modelRegistry: unknown;
-	modelId: string | undefined;
 	signal?: AbortSignal;
 };
 
@@ -95,7 +94,6 @@ type RunnerProps = {
 async function runnerFor(params: RunnerProps): Promise<RunAgentFn> {
 	const agentConfig: PiAgentConfig = await buildAgentConfig(params.agent, {
 		sessionDir: params.ctx.sessionDir,
-		modelId: params.ctx.modelId,
 	});
 	return makeRunAgent({
 		runAgent: params.api.runAgent,
