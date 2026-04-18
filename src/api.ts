@@ -13,11 +13,17 @@ export type {
 } from "./bootstrap/inject.js";
 export { buildInjectHandler } from "./bootstrap/inject.js";
 
+export type { MarkerPayload } from "./common/markers.js";
+export { writeMarker } from "./common/markers.js";
+
 export type { ClaudeCodeToolName } from "./compat/tool-mapping.js";
 export { renderToolMappingMarkdown, TOOL_MAPPING } from "./compat/tool-mapping.js";
+
 export type { DiscoverHandler, DiscoverOptions } from "./skills/discover.js";
 export { buildResourcesDiscoverHandler } from "./skills/discover.js";
 
+export type { BuildCtx, PiAgentConfig } from "./subagents/agent-config-builder.js";
+export { buildAgentConfig } from "./subagents/agent-config-builder.js";
 export type { AgentFrontmatterLike } from "./subagents/frontmatter.js";
 export { parseAgentMarkdown } from "./subagents/frontmatter.js";
 export type { LoadAgentsOptions, LoadedAgents } from "./subagents/loader.js";
@@ -30,6 +36,14 @@ export type {
 	RunResult,
 } from "./subagents/render.js";
 export { renderMultiResult, renderSingleResult, renderSubagentCallHeader } from "./subagents/render.js";
+export type {
+	MakeRunAgentProps,
+	PiAgentsRunAgent,
+	PiAgentsRunAgentParams,
+	PiAgentsRunAgentResult,
+	RunAgentFn,
+} from "./subagents/run-agent-factory.js";
+export { makeRunAgent } from "./subagents/run-agent-factory.js";
 export type {
 	ChainSubagent,
 	ParallelSubagent,
@@ -44,23 +58,14 @@ export {
 	SingleSubagentSchema,
 	SubagentInputSchema,
 } from "./subagents/schema.js";
-export type { SubagentToolCtx, SubagentToolResult } from "./subagents/tool.js";
-export type { BuildRunConfigProps, RunConfig } from "./subagents/transform.js";
-export { buildRunConfig } from "./subagents/transform.js";
+export type { ExecuteSubagentProps, PiAgentsApi, SubagentToolCtx, SubagentToolResult } from "./subagents/tool.js";
+export { executeSubagent } from "./subagents/tool.js";
+
 export type { TodosCommandCtx, TodosCommandHandler } from "./todos/command.js";
 export { buildTodosCommandHandler } from "./todos/command.js";
-export type {
-	RenderTodosCallHeaderProps,
-	RenderTodosPanelProps,
-} from "./todos/render.js";
+export type { RenderTodosCallHeaderProps, RenderTodosPanelProps } from "./todos/render.js";
 export { renderTodosCallHeader, renderTodosPanel } from "./todos/render.js";
-export type {
-	TodoAction,
-	TodoDetails,
-	TodoItem,
-	TodoPriority,
-	TodoStatus,
-} from "./todos/schema.js";
+export type { TodoAction, TodoDetails, TodoItem, TodoPriority, TodoStatus } from "./todos/schema.js";
 export { TodoActionSchema, TodoDetailsSchema, TodoItemSchema } from "./todos/schema.js";
 export type { SessionEntryLike } from "./todos/state.js";
 export { reconstructTodos } from "./todos/state.js";
@@ -84,6 +89,8 @@ export type {
 	TodoPickerState,
 } from "./ui/todo-picker.js";
 export { createPickerState, onPickerKey, renderPicker } from "./ui/todo-picker.js";
+export type { PiTuiComponent, TodoPickerComponentProps } from "./ui/todo-picker-component.js";
+export { mapPiKeyToTodoPickerKey, TodoPickerComponent } from "./ui/todo-picker-component.js";
 export { truncateEnd, truncateMiddle, visibleLength, wrapLines } from "./ui/truncate.js";
 export type { WidgetCallProps, WidgetName } from "./ui/widget.js";
 export { clearWidget, setWidget } from "./ui/widget.js";
