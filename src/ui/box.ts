@@ -24,8 +24,10 @@ export function panel(props: PanelProps): string[] {
 	const titleVisible = visibleLength(titleStr);
 	const badgeVisible = visibleLength(badgeStr);
 
-	// Top border: ┌─ title ─…─ badge ─┐
-	const dashBudget = innerWidth - titleVisible - badgeVisible - 2;
+	// Top border target outer width = innerWidth + 2 (the two │ walls).
+	// Layout: ┌ ─ ' ' titleStr ' ' ${dashes} ${badgeStr} ┐
+	// Fixed chars: ┌ + ─ + ' ' + ' ' + ┐ = 5 (plus titleVisible + badgeVisible).
+	const dashBudget = innerWidth + 2 - 5 - titleVisible - badgeVisible;
 	const dashes = "─".repeat(Math.max(1, dashBudget));
 	const top = `┌─ ${titleStr} ${dashes}${badgeStr}┐`;
 
