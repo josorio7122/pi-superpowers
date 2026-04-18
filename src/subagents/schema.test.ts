@@ -1,11 +1,6 @@
 import { Value } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
-import {
-	detectMode,
-	ParallelSubagentSchema,
-	SingleSubagentSchema,
-	SubagentInputSchema,
-} from "./schema.js";
+import { detectMode, ParallelSubagentSchema, SingleSubagentSchema, SubagentInputSchema } from "./schema.js";
 
 describe("SingleSubagentSchema", () => {
 	it("accepts valid single", () => {

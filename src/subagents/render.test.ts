@@ -84,5 +84,4 @@ describe("renderMultiResult", () => {
 		});
 		expect(lines.some((l) => l.toLowerCase().includes("queued"))).toBe(true);
 	});
-
 });

@@ -93,7 +93,7 @@ export default async function superpowersExtension(pi: ExtensionAPI): Promise<vo
 		name: "superpowers_subagent",
 		label: "Subagent",
 		description:
-			"Dispatch a named superpowers agent via pi-agents. Modes: single {agent,task}, parallel {tasks:[...]}, chain {chain:[...]}.",
+			"Dispatch a named superpowers agent via pi-agents. Modes: single {agent,task}, parallel {tasks:[...]}.",
 		parameters: SubagentToolParamsSchema,
 		// biome-ignore lint/complexity/useMaxParams: pi's tool execute signature is fixed at 5 params
 		execute: (_toolCallId: string, params: unknown, signal: unknown, _onUpdate: unknown, ctx: unknown) => {
