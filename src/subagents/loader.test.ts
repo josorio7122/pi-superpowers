@@ -13,15 +13,16 @@ async function fixture(files: Record<string, string>): Promise<string> {
 }
 
 describe("loadAgents", () => {
-	it("loads valid agents from a dir", async () => {
+	it("loads valid agents from a dir (plus built-in general-purpose)", async () => {
 		const dir = await fixture({
 			"code-reviewer.md": "---\nname: code-reviewer\ndescription: x\n---\nbody",
 			"other.md": "---\nname: other\n---\nbody",
 		});
 		const { agents, diagnostics } = await loadAgents({ agentsDir: dir });
-		expect(agents).toHaveLength(2);
-		expect(diagnostics).toEqual([]);
 		expect(findAgent(agents, "code-reviewer")?.description).toBe("x");
+		expect(findAgent(agents, "other")).toBeDefined();
+		expect(findAgent(agents, "general-purpose")).toBeDefined();
+		expect(diagnostics).toEqual([]);
 	});
 
 	it("diagnostics non-markdown and invalid frontmatter", async () => {
@@ -31,13 +32,14 @@ describe("loadAgents", () => {
 			"readme.txt": "not a markdown",
 		});
 		const { agents, diagnostics } = await loadAgents({ agentsDir: dir });
-		expect(agents).toHaveLength(1);
+		expect(findAgent(agents, "valid")).toBeDefined();
+		expect(findAgent(agents, "general-purpose")).toBeDefined();
 		expect(diagnostics.some((d) => d.file === "noname.md")).toBe(true);
 	});
 
-	it("returns diagnostic when agents dir is missing", async () => {
+	it("returns diagnostic when agents dir is missing (still includes built-ins)", async () => {
 		const { agents, diagnostics } = await loadAgents({ agentsDir: "/nonexistent/path/xyz" });
-		expect(agents).toEqual([]);
+		expect(findAgent(agents, "general-purpose")).toBeDefined();
 		expect(diagnostics).toHaveLength(1);
 	});
 });
@@ -45,5 +47,21 @@ describe("loadAgents", () => {
 describe("findAgent", () => {
 	it("returns undefined for missing name", () => {
 		expect(findAgent([{ name: "a", body: "" }], "missing")).toBeUndefined();
+	});
+});
+
+describe("loadAgents includes pi-superpowers built-ins", () => {
+	it("adds general-purpose when upstream agents dir has no collision", async () => {
+		const { agents } = await loadAgents({ agentsDir: "/nonexistent/xyz" });
+		expect(agents.some((a) => a.name === "general-purpose")).toBe(true);
+	});
+
+	it("upstream agents/*.md wins on name collision with a built-in", async () => {
+		const dir = await fixture({
+			"general-purpose.md": "---\nname: general-purpose\ndescription: Upstream-authored\n---\nUpstream body wins.",
+		});
+		const { agents } = await loadAgents({ agentsDir: dir });
+		const gp = agents.find((a) => a.name === "general-purpose");
+		expect(gp?.body).toContain("Upstream body wins.");
 	});
 });

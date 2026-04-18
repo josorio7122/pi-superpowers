@@ -1,6 +1,7 @@
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { vendorAgentsDir } from "../common/paths.js";
+import { BUILTIN_AGENTS } from "./builtin-agents.js";
 import { type AgentFrontmatterLike, parseAgentMarkdown } from "./frontmatter.js";
 
 export type LoadAgentsOptions = {
@@ -12,6 +13,16 @@ export type LoadedAgents = {
 	diagnostics: Array<{ file: string; reason: string }>;
 };
 
+function mergeBuiltins(upstream: AgentFrontmatterLike[]): AgentFrontmatterLike[] {
+	const seenNames = new Set(upstream.map((a) => a.name));
+	const merged = [...upstream];
+	for (const builtin of BUILTIN_AGENTS) {
+		if (seenNames.has(builtin.name)) continue;
+		merged.push(builtin);
+	}
+	return merged;
+}
+
 export async function loadAgents(opts: LoadAgentsOptions = {}): Promise<LoadedAgents> {
 	const dir = opts.agentsDir ?? vendorAgentsDir();
 	const agents: AgentFrontmatterLike[] = [];
@@ -21,7 +32,7 @@ export async function loadAgents(opts: LoadAgentsOptions = {}): Promise<LoadedAg
 	try {
 		entries = await readdir(dir);
 	} catch {
-		return { agents, diagnostics: [{ file: dir, reason: "agents dir missing" }] };
+		return { agents: mergeBuiltins(agents), diagnostics: [{ file: dir, reason: "agents dir missing" }] };
 	}
 
 	for (const name of entries) {
@@ -40,7 +51,7 @@ export async function loadAgents(opts: LoadAgentsOptions = {}): Promise<LoadedAg
 		}
 	}
 
-	return { agents, diagnostics };
+	return { agents: mergeBuiltins(agents), diagnostics };
 }
 
 export function findAgent(agents: AgentFrontmatterLike[], name: string): AgentFrontmatterLike | undefined {
