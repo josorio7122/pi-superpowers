@@ -77,7 +77,7 @@ export function renderSingleResult(props: RenderSingleProps): string[] {
 }
 
 export type RenderMultiProps = {
-	mode: "parallel" | "chain";
+	mode: "parallel";
 	results: RunResult[];
 	planned: number;
 	primaryArg: string;

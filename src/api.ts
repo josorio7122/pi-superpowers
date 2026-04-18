@@ -45,14 +45,12 @@ export type {
 } from "./subagents/run-agent-factory.js";
 export { makeRunAgent } from "./subagents/run-agent-factory.js";
 export type {
-	ChainSubagent,
 	ParallelSubagent,
 	SingleSubagent,
 	SubagentInput,
 	SubagentMode,
 } from "./subagents/schema.js";
 export {
-	ChainSubagentSchema,
 	detectMode,
 	ParallelSubagentSchema,
 	SingleSubagentSchema,

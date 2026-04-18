@@ -27,8 +27,7 @@ async function loadPiAgents(): Promise<PiAgentsApi> {
 	if (
 		typeof mod.runAgent !== "function" ||
 		typeof mod.executeSingle !== "function" ||
-		typeof mod.executeParallel !== "function" ||
-		typeof mod.executeChain !== "function"
+		typeof mod.executeParallel !== "function"
 	) {
 		throw new Error(
 			"pi-superpowers v5.1 requires pi-agents to be installed. Run: pi install git:github.com/josorio7122/pi-agents",

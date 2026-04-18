@@ -85,17 +85,4 @@ describe("renderMultiResult", () => {
 		expect(lines.some((l) => l.toLowerCase().includes("queued"))).toBe(true);
 	});
 
-	it("chain renders steps in order", () => {
-		const lines = renderMultiResult({
-			mode: "chain",
-			results: [success("scout"), success("planner")],
-			planned: 3,
-			primaryArg: "chain: 3 steps",
-			theme,
-			width: 80,
-		});
-		expect(lines[0]).toContain("chain: 3 steps");
-		expect(lines.some((l) => l.includes("scout"))).toBe(true);
-		expect(lines.some((l) => l.includes("planner"))).toBe(true);
-	});
 });

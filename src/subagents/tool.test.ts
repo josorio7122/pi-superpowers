@@ -35,16 +35,7 @@ function okAgentsApi(): PiAgentsApi {
 			);
 		},
 	);
-	const executeChain = vi.fn(
-		async (params: { tasks: Array<{ task: string; runAgent: (p: { task: string }) => Promise<unknown> }> }) => {
-			const results: Array<{ output: string; metrics: unknown }> = [];
-			for (const t of params.tasks) {
-				results.push((await t.runAgent({ task: t.task })) as { output: string; metrics: unknown });
-			}
-			return results;
-		},
-	);
-	return { runAgent, executeSingle, executeParallel, executeChain } as unknown as PiAgentsApi;
+	return { runAgent, executeSingle, executeParallel } as unknown as PiAgentsApi;
 }
 
 async function baseProps(api: PiAgentsApi, input: unknown): Promise<ExecuteSubagentProps> {
@@ -78,21 +69,6 @@ describe("executeSubagent parallel", () => {
 			}),
 		);
 		expect(out.details.mode).toBe("parallel");
-	});
-});
-
-describe("executeSubagent chain", () => {
-	it("calls executeChain with steps in order", async () => {
-		const api = okAgentsApi();
-		const out = await executeSubagent(
-			await baseProps(api, {
-				chain: [
-					{ agent: "scout", task: "find" },
-					{ agent: "code-reviewer", task: "review {previous}" },
-				],
-			}),
-		);
-		expect(out.details.mode).toBe("chain");
 	});
 });
 

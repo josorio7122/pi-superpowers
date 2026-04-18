@@ -20,10 +20,6 @@ export type PiAgentsApi = {
 		maxConcurrency: number;
 		signal?: AbortSignal;
 	}) => Promise<Array<{ output: string; metrics: unknown; error?: string }>>;
-	executeChain: (params: {
-		tasks: Array<{ task: string; runAgent: RunAgentFn }>;
-		signal?: AbortSignal;
-	}) => Promise<Array<{ output: string; metrics: unknown; error?: string }>>;
 };
 
 export type SubagentToolCtx = {
@@ -131,13 +127,13 @@ async function handleSingle(
 }
 
 type HandleMultiParams = {
-	mode: "parallel" | "chain";
+	mode: "parallel";
 	tasks: Array<{ agent: string; task: string }>;
 	props: ExecuteSubagentProps;
 };
 
 async function handleMulti(params: HandleMultiParams): Promise<SubagentToolResult> {
-	const { mode, tasks, props } = params;
+	const { tasks, props } = params;
 	const { agents, ctx, piAgentsApi } = props;
 	const theme = createTheme({ color: ctx.ui.colorEnabled !== false });
 	const width = ctx.ui.width ?? 80;
@@ -151,33 +147,29 @@ async function handleMulti(params: HandleMultiParams): Promise<SubagentToolResul
 				return { task: t.task, runAgent: await runnerFor({ agent, ctx, api: piAgentsApi }) };
 			}),
 		);
-		const raws =
-			mode === "parallel"
-				? await piAgentsApi.executeParallel({
-						tasks: runners,
-						maxConcurrency: 3,
-						...(ctx.signal ? { signal: ctx.signal } : {}),
-					})
-				: await piAgentsApi.executeChain({
-						tasks: runners,
-						...(ctx.signal ? { signal: ctx.signal } : {}),
-					});
+		const raws = await piAgentsApi.executeParallel({
+			tasks: runners,
+			maxConcurrency: 3,
+			...(ctx.signal ? { signal: ctx.signal } : {}),
+		});
 		const results = raws.map((r, i) => toRunResult(tasks[i]?.agent ?? "?", r));
-		const primaryArg = mode === "parallel" ? `parallel: ${tasks.length} tasks` : `chain: ${tasks.length} steps`;
+		const primaryArg = `parallel: ${tasks.length} tasks`;
 		return {
 			content: [
 				{
 					type: "text",
-					text: renderMultiResult({ mode, results, planned: tasks.length, primaryArg, width, theme }).join("\n"),
+					text: renderMultiResult({ mode: "parallel", results, planned: tasks.length, primaryArg, width, theme }).join(
+						"\n",
+					),
 				},
 			],
 			details: {
-				mode,
+				mode: "parallel",
 				results: results.map((r) => ({ name: r.name, metrics: r.metrics, error: r.error ?? null })),
 			},
 		};
 	} catch (err) {
-		return errorResult(`${mode} dispatch failed: ${(err as Error).message}`);
+		return errorResult(`parallel dispatch failed: ${(err as Error).message}`);
 	}
 }
 
@@ -198,9 +190,5 @@ export async function executeSubagent(props: ExecuteSubagentProps): Promise<Suba
 			props,
 		});
 	}
-	return handleMulti({
-		mode: "chain",
-		tasks: (input as { chain: Array<{ agent: string; task: string }> }).chain,
-		props,
-	});
+	return errorResult("Invalid subagent input: expected single or parallel mode.");
 }

@@ -1,6 +1,6 @@
 /**
  * Simulates pi-superpowers TUI rendering with ANSI colors and streaming updates.
- * Usage: npx tsx scripts/simulate-ui.ts [todos|subagent-single|subagent-parallel|subagent-chain|widget|all]
+ * Usage: npx tsx scripts/simulate-ui.ts [todos|subagent-single|subagent-parallel|widget|all]
  * Default: all
  */
 import { clearAndPrint, randomMetrics, sleep, theme as bannerTheme } from "./simulate-helpers.js";
@@ -191,72 +191,6 @@ async function simulateSubagentParallel() {
 	await sleep(1500);
 }
 
-async function simulateSubagentChain() {
-	banner("SUBAGENT · CHAIN");
-	const lc = { value: 0 };
-	const primaryArg = "chain: 3 steps";
-	const names = ["scout", "planner", "implementer"];
-	let results: RunResult[] = [];
-
-	const render = () =>
-		renderMultiResult({ mode: "chain", results, planned: 3, primaryArg, theme, width: WIDTH }).join("\n");
-
-	// queued
-	printState(render(), lc);
-	await sleep(800);
-
-	// step 1 running & done
-	for (let t = 0; t < 3; t++) {
-		const m = randomMetrics(t + 1, t + 1);
-		results = [
-			{ name: names[0] ?? "scout", text: "", metrics: { inTok: m.inputTokens, outTok: m.outputTokens, durationMs: (t + 1) * 500 } },
-		];
-		printState(render(), lc);
-		await sleep(400);
-	}
-	results = [
-		{ name: names[0] ?? "scout", text: "found auth code across 12 files", metrics: { inTok: 800, outTok: 200, durationMs: 2000, usd: 0.008, toolCalls: 2 } },
-	];
-	printState(render(), lc);
-	await sleep(600);
-
-	// step 2 running & done
-	for (let t = 0; t < 4; t++) {
-		const m = randomMetrics(t + 1, (t + 1) * 1.5);
-		results = [
-			results[0] as RunResult,
-			{ name: names[1] ?? "planner", text: "", metrics: { inTok: m.inputTokens, outTok: m.outputTokens, durationMs: (t + 1) * 600 } },
-		];
-		printState(render(), lc);
-		await sleep(400);
-	}
-	results = [
-		results[0] as RunResult,
-		{ name: names[1] ?? "planner", text: "plan drafted", metrics: { inTok: 1200, outTok: 400, durationMs: 2500, usd: 0.014, toolCalls: 3 } },
-	];
-	printState(render(), lc);
-	await sleep(600);
-
-	// step 3 running & done
-	for (let t = 0; t < 3; t++) {
-		const m = randomMetrics(t + 1, (t + 1) * 1.2);
-		results = [
-			results[0] as RunResult,
-			results[1] as RunResult,
-			{ name: names[2] ?? "implementer", text: "", metrics: { inTok: m.inputTokens, outTok: m.outputTokens, durationMs: (t + 1) * 700 } },
-		];
-		printState(render(), lc);
-		await sleep(400);
-	}
-	results = [
-		results[0] as RunResult,
-		results[1] as RunResult,
-		{ name: names[2] ?? "implementer", text: "implementation complete", metrics: { inTok: 1600, outTok: 600, durationMs: 3000, usd: 0.02, toolCalls: 5 } },
-	];
-	printState(render(), lc);
-	await sleep(1500);
-}
-
 async function simulateWidget() {
 	banner("WIDGET (standalone)");
 	const lc = { value: 0 };
@@ -295,7 +229,6 @@ async function main() {
 	if (mode === "todos" || mode === "all") await simulateTodos();
 	if (mode === "subagent-single" || mode === "all") await simulateSubagentSingle();
 	if (mode === "subagent-parallel" || mode === "all") await simulateSubagentParallel();
-	if (mode === "subagent-chain" || mode === "all") await simulateSubagentChain();
 	if (mode === "widget" || mode === "all") await simulateWidget();
 	console.log("\n");
 }
