@@ -1,6 +1,6 @@
 {
   "name": "pi-superpowers",
-  "version": "5.1.2",
+  "version": "5.2.0",
   "description": "Superpowers for pi — TDD, debugging, collaboration patterns, and proven techniques",
   "keywords": [
     "pi-package",
@@ -31,7 +31,9 @@
     "lint:fix": "biome check --fix src/",
     "format": "biome format --write src/",
     "check": "npm run lint && npm run typecheck && npm run test",
-    "sync-upstream": "bash scripts/sync-upstream.sh"
+    "sync-upstream": "bash scripts/sync-upstream.sh",
+    "simulate-ui": "tsx scripts/simulate-ui.ts",
+    "simulate-ui:all": "tsx scripts/simulate-ui.ts all"
   },
   "peerDependencies": {
     "@mariozechner/pi-coding-agent": "*"

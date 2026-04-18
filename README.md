@@ -66,6 +66,21 @@ PI_BIN=$(which pi) npm run test:e2e                   # fast E2E (~3-5 min)
 PI_BIN=$(which pi) E2E_FULL=1 npm run test:e2e:full   # full E2E incl. multi-session (~10 min, costs model tokens)
 ```
 
+### Previewing the TUI
+
+Watch the tool-call and result panels animate in your terminal:
+
+```bash
+npm run simulate-ui:all                        # every surface back-to-back
+npm run simulate-ui todos                      # only the todos panel
+npm run simulate-ui subagent-single
+npm run simulate-ui subagent-parallel
+npm run simulate-ui subagent-chain
+npm run simulate-ui widget
+```
+
+Tweak `src/ui/tree.ts` or any `src/*/render.ts` and re-run to see changes live. The simulator is a design-preview tool — regression safety lives in `*.test.ts` snapshot tests.
+
 ## Architecture
 
 See [`docs/specs/2026-04-23-v5.1-feature-complete-design.md`](docs/specs/2026-04-23-v5.1-feature-complete-design.md).
