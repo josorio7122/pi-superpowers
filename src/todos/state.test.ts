@@ -43,4 +43,54 @@ describe("reconstructTodos", () => {
 		const entries: SessionEntryLike[] = [{ details: { todos: [] } }];
 		expect(reconstructTodos(entries)).toEqual([]);
 	});
+
+	it("finds todos in pi's real SessionMessageEntry shape (nested message.toolName)", () => {
+		const entries: SessionEntryLike[] = [
+			{
+				type: "message",
+				message: {
+					role: "toolResult",
+					toolName: "superpowers_todo",
+					details: {
+						todos: [
+							{ id: "1", content: "a", status: "pending" },
+							{ id: "2", content: "b", status: "completed" },
+						],
+						action: "replace",
+					},
+				},
+			},
+		];
+		const todos = reconstructTodos(entries);
+		expect(todos).toHaveLength(2);
+		expect(todos[0]?.id).toBe("1");
+	});
+
+	it("ignores nested-shape entries with role !== 'toolResult'", () => {
+		const entries: SessionEntryLike[] = [
+			{ type: "message", message: { role: "assistant", toolName: "superpowers_todo" } },
+		];
+		expect(reconstructTodos(entries)).toEqual([]);
+	});
+
+	it("picks the most recent entry regardless of shape mix", () => {
+		const entries: SessionEntryLike[] = [
+			{
+				tool: "superpowers_todo",
+				details: { todos: [{ id: "old", content: "old", status: "pending" }], action: "add" },
+			},
+			{
+				type: "message",
+				message: {
+					role: "toolResult",
+					toolName: "superpowers_todo",
+					details: {
+						todos: [{ id: "new", content: "new", status: "in_progress" }],
+						action: "replace",
+					},
+				},
+			},
+		];
+		expect(reconstructTodos(entries)[0]?.id).toBe("new");
+	});
 });
