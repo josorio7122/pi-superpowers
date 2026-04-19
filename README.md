@@ -45,17 +45,18 @@ Upstream agent has `model: inherit` but your pi session has no active model. Sel
 
 ## Updating superpowers
 
-When `obra/superpowers` tags a new release:
+See [`docs/sync-playbook.md`](docs/sync-playbook.md) for the full workflow, including what the parity-check guards against. Quick version:
 
 ```bash
-./scripts/sync-upstream.sh v5.1.1
+./scripts/sync-upstream.sh v5.X.Y
+npm run parity-check   # fails loudly if upstream adds a surface we don't handle
 npm run check
 PI_BIN=$(which pi) npm run test:e2e
-git add -A && git commit -m "Sync superpowers to v5.1.1"
-git tag v5.1.1 && git push --follow-tags
+git add -A && git commit -m "Sync superpowers to v5.X.Y"
+git tag v5.X.Y && git push --follow-tags
 ```
 
-Zero merge conflicts — `src/` never edits `vendor/superpowers/`.
+Zero merge conflicts — `src/` never edits `vendor/superpowers/`. Generic loaders pick up new skills, commands, and agents automatically.
 
 ## Development
 
