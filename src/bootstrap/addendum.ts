@@ -7,7 +7,7 @@ export type AddendumOptions = {
 
 export function renderPiAddendum(opts: AddendumOptions): string {
 	const subagentNote = opts.subagentAvailable
-		? "Use `superpowers_subagent` to dispatch named agents (single / parallel / chain)."
+		? "Use `superpowers_subagent` to dispatch named agents (single / parallel)."
 		: "Subagent dispatch is currently unavailable (pi-agents not installed). Skills that reference `Task` should fall back to single-session workflows.";
 	const lines = ["**Pi-specific tool mapping**", "", renderToolMappingMarkdown(), "", subagentNote];
 
