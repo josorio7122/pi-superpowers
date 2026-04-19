@@ -1,6 +1,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileExists } from "../common/fs.js";
+import { vendorUsingSuperpowersSkill } from "../common/paths.js";
 import type { AgentFrontmatterLike } from "./frontmatter.js";
 
 export type PiAgentConfig = {
@@ -79,7 +80,7 @@ export async function buildAgentConfig(upstream: AgentFrontmatterLike, ctx: Buil
 			icon: "🦸",
 			domain: [{ path: ".", read: true, write: true, delete: false }],
 			tools,
-			skills: [],
+			skills: [{ path: vendorUsingSuperpowersSkill(), when: "always" }],
 			knowledge: {
 				project: {
 					path: projectPath,

@@ -42,7 +42,17 @@ describe("buildAgentConfig defaults", () => {
 
 	it("sets skills to empty array", async () => {
 		const cfg = await buildAgentConfig(upstream(), await ctx());
-		expect(cfg.frontmatter.skills).toEqual([]);
+		expect(cfg.frontmatter.skills).toHaveLength(1);
+	});
+
+	it("populates skills with the using-superpowers path when upstream omits it", async () => {
+		const sessionDir = await tmpSession();
+		const config = await buildAgentConfig({ name: "code-reviewer", body: "You are a reviewer." }, { sessionDir });
+		expect(config.frontmatter.skills).toHaveLength(1);
+		expect(config.frontmatter.skills[0]).toMatchObject({
+			path: expect.stringContaining("vendor/superpowers/skills/using-superpowers/SKILL.md"),
+			when: "always",
+		});
 	});
 
 	it("sets conversation.path with {{SESSION_ID}} token and agent name", async () => {
