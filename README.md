@@ -2,12 +2,12 @@
 
 [Superpowers](https://github.com/obra/superpowers) skills library as a native pi package — with full subagent support.
 
-v5.1 ships the complete feature set with no feature flags: 15 skills, first-turn bootstrap, `superpowers_todo` tool + interactive `/todos` picker, `superpowers_subagent` tool with single/parallel/chain modes via `pi-agents`.
+v5.4 is a faithful adapter of obra/superpowers: 14 skills + 3 commands + 1 agent auto-registered from `vendor/superpowers/`, first-turn bootstrap, `superpowers_todo` tool with in_progress discipline, `superpowers_subagent` tool (single + parallel) via pi-agents' `createAgentTool` with live streaming + abort.
 
 ## Install
 
 ```bash
-pi install git:github.com/josorio7122/pi-superpowers@v5.1.1
+pi install git:github.com/josorio7122/pi-superpowers@v5.4.0
 ```
 
 `pi-agents` is bundled as a regular npm dependency — no separate install needed. If you later want to share a single pi-agents install across multiple packages, move it to your pi settings and it'll dedupe via npm.
@@ -30,7 +30,7 @@ The `-e` flag loads the extension directly from source with no install — great
 | **`/todos` interactive picker** | Type `/todos` in pi interactive mode — `j/k` nav, `space` toggle, `a` add, `x` remove, `1/2/3` priority, `q` quit |
 | **`superpowers_subagent` tool** | Single: `{ agent, task }`. Parallel: `{ tasks: [...] }`. Chain: `{ chain: [...] }` with `{previous}` substitution |
 | **Persistent todo widget** | Above-editor widget showing progress bar + current in-progress item; survives `/compact` |
-| **Session-start status** | Footer shows `🦸 Superpowers · v5.1.0 · 15 skills · subagents` on session start |
+| **Session-start status** | Footer shows `🦸 Superpowers · v5.4.0 · 14 skills · subagents` on session start |
 
 ## Troubleshooting
 
