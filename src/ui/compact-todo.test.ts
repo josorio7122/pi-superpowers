@@ -20,11 +20,39 @@ describe("renderTodosWidget", () => {
 		expect(renderTodosWidget({ items: [], theme, width: 80 })).toEqual([]);
 	});
 
-	it("renders brand + Todos header with N/M done at top", () => {
+	it("renders brand + activeForm of in_progress task as CC-style header", () => {
 		const lines = renderTodosWidget({ items: sample(), theme, width: 80 });
 		expect(lines[0]).toContain("[SP]");
-		expect(lines[0]).toContain("Todos");
-		expect(lines[0]).toContain("2/5 done");
+		// sample()'s in_progress item has content 'draft implementation plan' and no activeForm
+		expect(lines[0]).toContain("draft implementation plan");
+		expect(lines[0]).toContain("…");
+	});
+
+	it("falls back to 'N/M done' count header when no task is in_progress", () => {
+		const items: TodoItem[] = [
+			{ id: "1", content: "a", status: "completed" },
+			{ id: "2", content: "b", status: "pending" },
+		];
+		const lines = renderTodosWidget({ items, theme, width: 80 });
+		expect(lines[0]).toContain("Tasks");
+		expect(lines[0]).toContain("1/2 done");
+	});
+
+	it("prefers activeForm over content when rendering the header", () => {
+		const items: TodoItem[] = [
+			{ id: "1", content: "Build auth flow", activeForm: "Building auth flow", status: "in_progress" },
+		];
+		const lines = renderTodosWidget({ items, theme, width: 80 });
+		expect(lines[0]).toContain("Building auth flow");
+	});
+
+	it("appends elapsed time to the header when startedAt is set", () => {
+		const now = 100_000;
+		const items: TodoItem[] = [
+			{ id: "1", content: "Build", activeForm: "Building", status: "in_progress", startedAt: now - 42_000 },
+		];
+		const lines = renderTodosWidget({ items, theme, width: 80, now });
+		expect(lines[0]).toContain("(42s)");
 	});
 
 	it("renders one body line per todo, in order", () => {

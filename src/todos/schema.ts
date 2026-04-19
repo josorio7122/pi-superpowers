@@ -15,6 +15,8 @@ export const TodoItemSchema = Type.Object({
 	content: Type.String({ minLength: 1 }),
 	status: TodoStatusSchema,
 	priority: Type.Optional(TodoPrioritySchema),
+	activeForm: Type.Optional(Type.String({ minLength: 1 })),
+	startedAt: Type.Optional(Type.Number()),
 });
 export type TodoItem = Static<typeof TodoItemSchema>;
 
@@ -25,12 +27,14 @@ export const TodoActionSchema = Type.Union([
 	Type.Object({
 		action: Type.Literal("add"),
 		content: Type.String({ minLength: 1 }),
+		activeForm: Type.Optional(Type.String({ minLength: 1 })),
 		priority: Type.Optional(TodoPrioritySchema),
 	}),
 	Type.Object({
 		action: Type.Literal("update"),
 		id: Type.String({ minLength: 1 }),
 		content: Type.Optional(Type.String({ minLength: 1 })),
+		activeForm: Type.Optional(Type.String({ minLength: 1 })),
 		status: Type.Optional(TodoStatusSchema),
 		priority: Type.Optional(TodoPrioritySchema),
 	}),
@@ -64,6 +68,12 @@ export const TodoToolParamsSchema = Type.Object(
 		),
 		items: Type.Optional(Type.Array(TodoItemSchema, { description: "Required for action=replace" })),
 		content: Type.Optional(Type.String({ description: "Required for action=add; optional for action=update" })),
+		activeForm: Type.Optional(
+			Type.String({
+				description:
+					"Present-continuous form of content (e.g. 'Building X…' for content 'Build X'). Shown in the header while the task is in_progress.",
+			}),
+		),
 		id: Type.Optional(Type.String({ description: "Required for action=update/complete/remove" })),
 		status: Type.Optional(TodoStatusSchema),
 		priority: Type.Optional(TodoPrioritySchema),

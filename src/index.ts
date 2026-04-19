@@ -43,7 +43,7 @@ export default async function superpowersExtension(pi: ExtensionAPI): Promise<vo
 	}
 
 	pi.on("session_start", (async (_event: unknown, ctx: unknown) => {
-		setSuperpowersStatus(ctx as never, { text: "Superpowers · v5.4.0 · 14 skills · subagents" });
+		setSuperpowersStatus(ctx as never, { text: "Superpowers · v5.4.1 · 14 skills · subagents" });
 		setTimeout(() => {
 			clearSuperpowersStatus(ctx as never);
 		}, 3000);
@@ -67,7 +67,10 @@ export default async function superpowersExtension(pi: ExtensionAPI): Promise<vo
 		name: "superpowers_todo",
 		label: "Todos",
 		description:
-			"Track session-scoped todos. Actions: `add`, `replace`, `update`, `complete`, `remove`, `clear`, `list`. " +
+			"Track session-scoped tasks. Actions: `add`, `replace`, `update`, `complete`, `remove`, `clear`, `list`. " +
+			"Every task has `content` (static imperative form, e.g. 'Build login flow') and `activeForm` " +
+			"(present-continuous, e.g. 'Building login flow…'). The widget shows activeForm in its header " +
+			"while the task is in_progress, so always provide both when adding or updating. " +
 			"Discipline (match Claude Code TodoWrite): (1) Before starting work on a task, call `update` with `status: 'in_progress'`. " +
 			"(2) Only ONE task may be `in_progress` at a time — finish or park the current one before flipping another. " +
 			"(3) Call `complete` (or `update` with `status: 'completed'`) the moment a task is finished — don't batch. " +

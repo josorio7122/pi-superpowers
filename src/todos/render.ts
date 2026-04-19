@@ -16,6 +16,10 @@ export function renderTodosCallHeader(props: RenderTodosCallHeaderProps): string
 	return bullet({ label, theme: props.theme, ...(props.width !== undefined ? { width: props.width } : {}) });
 }
 
+function strikethrough(text: string): string {
+	return `\x1b[9m${text}\x1b[29m`;
+}
+
 export type RenderTodosResultProps = {
 	items: TodoItem[];
 	action: string;
@@ -28,11 +32,11 @@ export function renderTodosResult(props: RenderTodosResultProps): string[] {
 	const { items, action, theme, width } = props;
 	const header = renderTodosCallHeader({ action, args: "", theme, width });
 	if (items.length === 0) {
-		return [header, branch({ text: theme.dim("no todos"), theme, width })];
+		return [header, branch({ text: theme.dim("no tasks"), theme, width })];
 	}
 	const done = items.filter((i) => i.status === "completed").length;
 	const summary = branch({
-		text: `${items.length} todo${items.length === 1 ? "" : "s"} · ${done}/${items.length} done`,
+		text: `${items.length} task${items.length === 1 ? "" : "s"} · ${done}/${items.length} done`,
 		theme,
 		width,
 	});
@@ -40,7 +44,15 @@ export function renderTodosResult(props: RenderTodosResultProps): string[] {
 		const box = theme.color ? checkbox(item.status, { theme }) : checkbox(item.status, { theme, ascii: true });
 		const prio = priorityMark(item.priority, theme);
 		const prioChunk = prio ? `${theme.warn(prio)} ` : "  ";
-		const content = item.status === "completed" ? theme.dim(item.content) : item.content;
+		const raw = item.content;
+		let content: string;
+		if (item.status === "completed") {
+			content = theme.dim(theme.color ? strikethrough(raw) : raw);
+		} else if (item.status === "in_progress") {
+			content = theme.primary(raw);
+		} else {
+			content = raw;
+		}
 		return truncateEnd(indent(`${box}  ${prioChunk}${content}`, 5), width);
 	});
 	return [header, summary, ...rows];

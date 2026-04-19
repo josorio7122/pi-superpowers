@@ -26,7 +26,20 @@ function nextId(existing: TodoItem[]): string {
 	return String(max + 1);
 }
 
+type TransitionProps = { item: TodoItem; nextStatus: TodoItem["status"]; now: number };
+
+/** Transition an item's status, managing startedAt lifecycle. */
+function transitionStatus(props: TransitionProps): TodoItem {
+	const { item, nextStatus, now } = props;
+	if (item.status === nextStatus) return { ...item, status: nextStatus };
+	if (nextStatus === "in_progress") return { ...item, status: nextStatus, startedAt: now };
+	// leaving in_progress (→ pending or completed) clears startedAt
+	const { startedAt: _drop, ...rest } = item;
+	return { ...rest, status: nextStatus };
+}
+
 function applyAction(items: TodoItem[], action: TodoAction): TodoItem[] {
+	const now = Date.now();
 	if (action.action === "list") return items;
 	if (action.action === "clear") return [];
 	if (action.action === "replace") return action.items;
@@ -35,6 +48,7 @@ function applyAction(items: TodoItem[], action: TodoAction): TodoItem[] {
 			id: nextId(items),
 			content: action.content,
 			status: "pending",
+			...(action.activeForm ? { activeForm: action.activeForm } : {}),
 			...(action.priority ? { priority: action.priority } : {}),
 		};
 		return [...items, item];
@@ -42,16 +56,17 @@ function applyAction(items: TodoItem[], action: TodoAction): TodoItem[] {
 	if (action.action === "update") {
 		return items.map((i) => {
 			if (i.id !== action.id) return i;
-			return {
+			const withFields: TodoItem = {
 				...i,
 				...(action.content ? { content: action.content } : {}),
-				...(action.status ? { status: action.status } : {}),
+				...(action.activeForm ? { activeForm: action.activeForm } : {}),
 				...(action.priority ? { priority: action.priority } : {}),
 			};
+			return action.status ? transitionStatus({ item: withFields, nextStatus: action.status, now }) : withFields;
 		});
 	}
 	if (action.action === "complete") {
-		return items.map((i) => (i.id === action.id ? { ...i, status: "completed" as const } : i));
+		return items.map((i) => (i.id === action.id ? transitionStatus({ item: i, nextStatus: "completed", now }) : i));
 	}
 	return items.filter((i) => i.id !== action.id);
 }

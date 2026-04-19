@@ -2,7 +2,7 @@ import type { TodoPriority, TodoStatus } from "../todos/schema.js";
 import type { Theme } from "./theme.js";
 import { truncateEnd } from "./truncate.js";
 
-const CHECKBOX_UNICODE = { pending: "☐", in_progress: "◐", completed: "☒" } as const;
+const CHECKBOX_UNICODE = { pending: "☐", in_progress: "■", completed: "☒" } as const;
 const CHECKBOX_ASCII = { pending: "[ ]", in_progress: "[*]", completed: "[x]" } as const;
 const BULLET = "●";
 const BRANCH = "⎿";

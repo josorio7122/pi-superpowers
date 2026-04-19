@@ -47,7 +47,7 @@ describe("checkbox", () => {
 		expect(checkbox("pending" as TodoStatus, { theme })).toBe("☐");
 	});
 	it("returns in-progress glyph for in_progress", () => {
-		expect(checkbox("in_progress" as TodoStatus, { theme })).toBe("◐");
+		expect(checkbox("in_progress" as TodoStatus, { theme })).toBe("■");
 	});
 	it("returns done glyph for completed", () => {
 		expect(checkbox("completed" as TodoStatus, { theme })).toBe("☒");

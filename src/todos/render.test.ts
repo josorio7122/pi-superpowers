@@ -27,18 +27,18 @@ describe("renderTodosCallHeader", () => {
 });
 
 describe("renderTodosResult", () => {
-	it("renders header + 'no todos' branch when items is empty", () => {
+	it("renders header + 'no tasks' branch when items is empty", () => {
 		const lines = renderTodosResult({ items: [], action: "clear", theme, width: 80 });
 		expect(lines).toHaveLength(2);
 		expect(lines[0]).toContain("superpowers_todo(clear)");
-		expect(lines[1]).toContain("no todos");
+		expect(lines[1]).toContain("no tasks");
 	});
 
 	it("renders header + summary + N rows", () => {
 		const lines = renderTodosResult({ items: sample(), action: "replace", theme, width: 80 });
 		expect(lines).toHaveLength(2 + 5); // header + summary + 5 items
 		expect(lines[0]).toContain("superpowers_todo(replace)");
-		expect(lines[1]).toContain("5 todos · 2/5 done");
+		expect(lines[1]).toContain("5 tasks · 2/5 done");
 		expect(lines[2]).toContain("[x]");
 		expect(lines[2]).toContain("write brainstorming doc");
 		expect(lines[4]).toContain("[*]");
