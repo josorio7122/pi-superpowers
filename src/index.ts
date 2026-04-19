@@ -38,7 +38,7 @@ export default async function superpowersExtension(pi: ExtensionAPI): Promise<vo
 	}
 
 	pi.on("session_start", (async (_event: unknown, ctx: unknown) => {
-		setSuperpowersStatus(ctx as never, { text: "Superpowers · v5.5.0 · 14 skills · tasks + agents" });
+		setSuperpowersStatus(ctx as never, { text: "Superpowers · v5.5.1 · 14 skills · tasks + agents" });
 		setTimeout(() => {
 			clearSuperpowersStatus(ctx as never);
 		}, 3000);
