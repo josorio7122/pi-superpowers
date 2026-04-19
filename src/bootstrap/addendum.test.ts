@@ -58,4 +58,17 @@ describe("renderPiAddendum lists available agent names", () => {
 			"available agents",
 		);
 	});
+
+	it("includes todo discipline reminder", () => {
+		const text = renderPiAddendum({ subagentAvailable: true });
+		expect(text).toMatch(/todo discipline/i);
+		expect(text).toMatch(/in_progress/);
+	});
+
+	it("describes single and parallel subagent modes without chain", () => {
+		const text = renderPiAddendum({ subagentAvailable: true });
+		expect(text).toContain("single dispatch");
+		expect(text).toContain("parallel");
+		expect(text).not.toMatch(/chain/);
+	});
 });

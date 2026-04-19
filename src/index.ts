@@ -67,7 +67,11 @@ export default async function superpowersExtension(pi: ExtensionAPI): Promise<vo
 		name: "superpowers_todo",
 		label: "Todos",
 		description:
-			"Track session-scoped todos. Actions: add, replace, update, complete, remove, clear, list. See the action param schema for the shape each action expects.",
+			"Track session-scoped todos. Actions: `add`, `replace`, `update`, `complete`, `remove`, `clear`, `list`. " +
+			"Discipline (match Claude Code TodoWrite): (1) Before starting work on a task, call `update` with `status: 'in_progress'`. " +
+			"(2) Only ONE task may be `in_progress` at a time — finish or park the current one before flipping another. " +
+			"(3) Call `complete` (or `update` with `status: 'completed'`) the moment a task is finished — don't batch. " +
+			"(4) Break large tasks into smaller sub-tasks if you can't commit to finishing in one go.",
 		parameters: TodoToolParamsSchema,
 		// biome-ignore lint/complexity/useMaxParams: pi's tool execute signature is fixed at 5 params
 		execute: (_toolCallId: string, params: unknown, _signal: unknown, _onUpdate: unknown, ctx: unknown) =>
