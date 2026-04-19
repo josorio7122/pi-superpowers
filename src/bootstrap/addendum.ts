@@ -7,7 +7,7 @@ export type AddendumOptions = {
 
 export function renderPiAddendum(opts: AddendumOptions): string {
 	const subagentNote = opts.subagentAvailable
-		? "Use `superpowers_subagent` to dispatch named agents. Provide `{agent, task}` for single dispatch or `{tasks: [...]}` for parallel."
+		? "Use the `agent` tool to dispatch named agents. Provide `{agent, task}` for single dispatch or `{tasks: [...]}` for parallel."
 		: "Subagent dispatch is currently unavailable (pi-agents not installed). Skills that reference `Task` should fall back to single-session workflows.";
 	const lines = ["**Pi-specific tool mapping**", "", renderToolMappingMarkdown(), "", subagentNote];
 
@@ -25,7 +25,7 @@ export function renderPiAddendum(opts: AddendumOptions): string {
 
 	lines.push(
 		"",
-		"**Todo discipline:** When working through a `superpowers_todo` list, flip each task to `in_progress` BEFORE you start work on it, and to `completed` the moment it's done. Keep only ONE task `in_progress` at a time.",
+		"**Task discipline:** When working through a `task` list, flip each task to `in_progress` BEFORE you start work on it, and to `completed` the moment it's done. Keep only ONE task `in_progress` at a time.",
 	);
 
 	return lines.join("\n");

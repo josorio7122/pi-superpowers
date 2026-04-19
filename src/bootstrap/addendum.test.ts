@@ -5,8 +5,8 @@ describe("renderPiAddendum", () => {
 	it("contains the pi tool-mapping table", () => {
 		const text = renderPiAddendum({ subagentAvailable: true });
 		expect(text).toContain("| `Read` | `read` |");
-		expect(text).toContain("| `TodoWrite` | `superpowers_todo` |");
-		expect(text).toContain("| `Task` | `superpowers_subagent` |");
+		expect(text).toContain("| `TodoWrite` | `task` |");
+		expect(text).toContain("| `Task` | `agent` |");
 	});
 
 	it("mentions pi-native /skill:name", () => {
@@ -59,14 +59,15 @@ describe("renderPiAddendum lists available agent names", () => {
 		);
 	});
 
-	it("includes todo discipline reminder", () => {
+	it("includes task discipline reminder", () => {
 		const text = renderPiAddendum({ subagentAvailable: true });
-		expect(text).toMatch(/todo discipline/i);
+		expect(text).toMatch(/task discipline/i);
 		expect(text).toMatch(/in_progress/);
 	});
 
-	it("describes single and parallel subagent modes without chain", () => {
+	it("describes agent tool with single + parallel dispatch", () => {
 		const text = renderPiAddendum({ subagentAvailable: true });
+		expect(text).toContain("`agent` tool");
 		expect(text).toContain("single dispatch");
 		expect(text).toContain("parallel");
 		expect(text).not.toMatch(/chain/);

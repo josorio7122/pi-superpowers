@@ -8,8 +8,8 @@ export const TOOL_MAPPING = {
 	Bash: "bash",
 	Grep: "grep",
 	Glob: "glob",
-	TodoWrite: "superpowers_todo",
-	Task: "superpowers_subagent",
+	TodoWrite: "task",
+	Task: "agent",
 	Skill: "/skill:name (pi-native)",
 } as const;
 
