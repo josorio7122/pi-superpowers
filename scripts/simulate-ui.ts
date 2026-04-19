@@ -1,12 +1,11 @@
 /**
  * Simulates pi-superpowers TUI rendering with ANSI colors and streaming updates.
- * Usage: npx tsx scripts/simulate-ui.ts [todos|subagent-single|subagent-parallel|widget|all]
+ * Usage: npx tsx scripts/simulate-ui.ts [todos|widget|all]
  * Default: all
  */
-import { clearAndPrint, randomMetrics, sleep, theme as bannerTheme } from "./simulate-helpers.js";
+import { clearAndPrint, sleep, theme as bannerTheme } from "./simulate-helpers.js";
 import { renderTodosError, renderTodosResult } from "../src/todos/render.js";
 import type { TodoItem } from "../src/todos/schema.js";
-import { renderMultiResult, renderSingleResult, type RunResult } from "../src/subagents/render.js";
 import { renderTodosWidget } from "../src/ui/compact-todo.js";
 import { createTheme } from "../src/ui/theme.js";
 
@@ -83,114 +82,6 @@ async function simulateTodos() {
 	await sleep(500);
 }
 
-async function simulateSubagentSingle() {
-	banner("SUBAGENT · SINGLE");
-	const lc = { value: 0 };
-	const primaryArg = 'code-reviewer: "review step 2"';
-	let tick = 0;
-	let running = true;
-	let result: RunResult = { name: "code-reviewer", text: "", metrics: { inTok: 0, outTok: 0, durationMs: 0 } };
-
-	// Running animation — spinner + climbing metrics
-	for (let elapsed = 0; elapsed < 5; elapsed++) {
-		const m = randomMetrics(elapsed + 1, (elapsed + 1) * 0.6);
-		result.metrics = {
-			inTok: m.inputTokens,
-			outTok: m.outputTokens,
-			durationMs: (elapsed + 1) * 800,
-		};
-		tick = (tick + 1) % 8;
-		const frame = renderSingleResult({
-			result,
-			primaryArg,
-			theme,
-			width: WIDTH,
-			running,
-			spinnerTick: tick,
-		}).join("\n");
-		printState(frame, lc);
-		await sleep(600);
-	}
-
-	// Final frame — done
-	running = false;
-	const finalMetrics = randomMetrics(5, 4);
-	result = {
-		name: "code-reviewer",
-		text: "Changes look good. One nit: consider extracting the loop into a helper for clarity.",
-		metrics: {
-			inTok: finalMetrics.inputTokens,
-			outTok: finalMetrics.outputTokens,
-			durationMs: 4200,
-			usd: 0.018,
-			toolCalls: 4,
-		},
-	};
-	printState(
-		renderSingleResult({ result, primaryArg, theme, width: WIDTH }).join("\n"),
-		lc,
-	);
-	await sleep(1500);
-}
-
-async function simulateSubagentParallel() {
-	banner("SUBAGENT · PARALLEL");
-	const lc = { value: 0 };
-	const primaryArg = "parallel: 3 tasks";
-	const names = ["reviewer-backend", "reviewer-frontend", "reviewer-tests"];
-	let results: RunResult[] = [];
-
-	const render = () =>
-		renderMultiResult({ mode: "parallel", results, planned: 3, primaryArg, theme, width: WIDTH }).join("\n");
-
-	// all 3 queued
-	printState(render(), lc);
-	await sleep(800);
-
-	// all 3 running, climbing
-	for (let t = 0; t < 4; t++) {
-		results = names.map((name, i) => {
-			const m = randomMetrics(i + t + 1, (i + t) * 0.5);
-			return {
-				name,
-				text: "",
-				metrics: { inTok: m.inputTokens, outTok: m.outputTokens, durationMs: (t + 1) * 600 },
-			} as RunResult;
-		});
-		// For multi-result rendering we don't have a "running" flag per row in the current API —
-		// rows with no final metrics just render as done. For demo purposes we simulate progression
-		// by not pushing results yet in this phase. Alternative: render fewer results.
-		printState(render(), lc);
-		await sleep(500);
-	}
-
-	// task 0 done
-	const m0 = randomMetrics(4, 2.5);
-	results = [
-		{ name: names[0] ?? "r0", text: "", metrics: { inTok: m0.inputTokens, outTok: m0.outputTokens, durationMs: 2500, usd: 0.014, toolCalls: 2 } },
-	];
-	printState(render(), lc);
-	await sleep(700);
-
-	// task 1 done
-	const m1 = randomMetrics(3, 2);
-	results = [
-		...results,
-		{ name: names[1] ?? "r1", text: "", metrics: { inTok: m1.inputTokens, outTok: m1.outputTokens, durationMs: 2000, usd: 0.012, toolCalls: 1 } },
-	];
-	printState(render(), lc);
-	await sleep(700);
-
-	// task 2 done
-	const m2 = randomMetrics(5, 3);
-	results = [
-		...results,
-		{ name: names[2] ?? "r2", text: "", metrics: { inTok: m2.inputTokens, outTok: m2.outputTokens, durationMs: 3000, usd: 0.02, toolCalls: 3 } },
-	];
-	printState(render(), lc);
-	await sleep(1500);
-}
-
 async function simulateWidget() {
 	banner("WIDGET (standalone)");
 	const lc = { value: 0 };
@@ -227,8 +118,6 @@ async function simulateWidget() {
 async function main() {
 	const mode = process.argv[2] ?? "all";
 	if (mode === "todos" || mode === "all") await simulateTodos();
-	if (mode === "subagent-single" || mode === "all") await simulateSubagentSingle();
-	if (mode === "subagent-parallel" || mode === "all") await simulateSubagentParallel();
 	if (mode === "widget" || mode === "all") await simulateWidget();
 	console.log("\n");
 }

@@ -28,36 +28,6 @@ export type { AgentFrontmatterLike } from "./subagents/frontmatter.js";
 export { parseAgentMarkdown } from "./subagents/frontmatter.js";
 export type { LoadAgentsOptions, LoadedAgents } from "./subagents/loader.js";
 export { findAgent, loadAgents } from "./subagents/loader.js";
-export type {
-	CallHeaderProps,
-	RenderMultiProps,
-	RenderSingleProps,
-	RunMetrics,
-	RunResult,
-} from "./subagents/render.js";
-export { renderMultiResult, renderSingleResult, renderSubagentCallHeader } from "./subagents/render.js";
-export type {
-	MakeRunAgentProps,
-	PiAgentsRunAgent,
-	PiAgentsRunAgentParams,
-	PiAgentsRunAgentResult,
-	RunAgentFn,
-} from "./subagents/run-agent-factory.js";
-export { makeRunAgent } from "./subagents/run-agent-factory.js";
-export type {
-	ParallelSubagent,
-	SingleSubagent,
-	SubagentInput,
-	SubagentMode,
-} from "./subagents/schema.js";
-export {
-	detectMode,
-	ParallelSubagentSchema,
-	SingleSubagentSchema,
-	SubagentInputSchema,
-} from "./subagents/schema.js";
-export type { ExecuteSubagentProps, PiAgentsApi, SubagentToolCtx, SubagentToolResult } from "./subagents/tool.js";
-export { executeSubagent } from "./subagents/tool.js";
 
 export type {
 	RenderTodosCallHeaderProps,
