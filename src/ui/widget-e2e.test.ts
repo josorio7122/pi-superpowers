@@ -5,11 +5,10 @@ const PI_BIN = process.env.PI_BIN;
 const describeIfPi = PI_BIN ? describe : describe.skip;
 
 describeIfPi("widget marker e2e", () => {
-	it("superpowers_todo add triggers widget-set marker with lineCount > 0", async () => {
+	it("task add triggers widget-set marker with lineCount > 0", async () => {
 		const result = await runPiE2EWithRetry(
 			{
-				prompt:
-					'You MUST call the superpowers_todo tool with action "add" and content "hi there". Then briefly confirm.',
+				prompt: 'You MUST call the task tool with action "add" and content "hi there". Then briefly confirm.',
 				timeoutMs: 120_000,
 			},
 			{

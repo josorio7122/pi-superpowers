@@ -5,9 +5,9 @@ const ENABLED = Boolean(process.env.PI_BIN) && process.env.E2E_FULL === "1";
 const describeIfFull = ENABLED ? describe : describe.skip;
 
 describeIfFull("todo state persistence across session loads", () => {
-	it("superpowers_todo action=list in an isolated session returns a result + widget marker", async () => {
+	it("task action=list in an isolated session returns a result + widget marker", async () => {
 		const result = await runPiE2E({
-			prompt: 'Use the superpowers_todo tool with action "list". Print what you got.',
+			prompt: 'Use the task tool with action "list". Print what you got.',
 			timeoutMs: 120_000,
 		});
 		try {

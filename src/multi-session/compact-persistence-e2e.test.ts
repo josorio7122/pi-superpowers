@@ -7,7 +7,7 @@ const describeIfFull = ENABLED ? describe : describe.skip;
 describeIfFull("todo widget persistence", () => {
 	it("after adding a todo, at least one widget-set marker has lineCount > 0", async () => {
 		const result = await runPiE2E({
-			prompt: 'Use superpowers_todo to add a todo with content "survive compaction test", then finish.',
+			prompt: 'Use the task tool to add a task with content "survive compaction test", then finish.',
 			timeoutMs: 120_000,
 		});
 		try {
