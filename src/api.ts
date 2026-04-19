@@ -29,22 +29,8 @@ export { parseAgentMarkdown } from "./subagents/frontmatter.js";
 export type { LoadAgentsOptions, LoadedAgents } from "./subagents/loader.js";
 export { findAgent, loadAgents } from "./subagents/loader.js";
 
-export type {
-	RenderTodosCallHeaderProps,
-	RenderTodosErrorProps,
-	RenderTodosResultProps,
-} from "./todos/render.js";
-export { renderTodosCallHeader, renderTodosError, renderTodosResult } from "./todos/render.js";
-export type { TodoAction, TodoDetails, TodoItem, TodoPriority, TodoStatus } from "./todos/schema.js";
-export { TodoActionSchema, TodoDetailsSchema, TodoItemSchema } from "./todos/schema.js";
-export type { SessionEntryLike } from "./todos/state.js";
-export { reconstructTodos } from "./todos/state.js";
-export type { TodosToolCtx, TodosToolResult } from "./todos/tool.js";
-export { executeTodos } from "./todos/tool.js";
 export type { PanelProps } from "./ui/box.js";
 export { panel } from "./ui/box.js";
-export type { RenderTodosWidgetProps } from "./ui/compact-todo.js";
-export { renderTodosWidget } from "./ui/compact-todo.js";
 export type { ProgressBarProps, SpinnerProps } from "./ui/progress.js";
 export { progressBar, spinnerFrame } from "./ui/progress.js";
 export type { StatusCallProps } from "./ui/status.js";
