@@ -30,7 +30,8 @@
     "lint": "biome check src/",
     "lint:fix": "biome check --fix src/",
     "format": "biome format --write src/",
-    "check": "npm run lint && npm run typecheck && npm run test",
+    "check": "npm run lint && npm run typecheck && npm run test && npm run parity-check",
+    "parity-check": "tsx scripts/parity-check.ts",
     "sync-upstream": "bash scripts/sync-upstream.sh",
     "simulate-ui": "tsx scripts/simulate-ui.ts",
     "simulate-ui:all": "tsx scripts/simulate-ui.ts all"
