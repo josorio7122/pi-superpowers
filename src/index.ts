@@ -1,13 +1,13 @@
-// Thin pi extension entrypoint. v5.1: no feature flags; pi-agents is a hard peer dep.
+// Thin pi extension entrypoint. v5.4: createAgentTool from pi-agents.
 
+import { createAgentTool } from "pi-agents";
 import { buildInjectHandler } from "./bootstrap/inject.js";
 import { buildCommandHandler } from "./commands/handler.js";
 import { loadCommands } from "./commands/loader.js";
 import { vendorRoot } from "./common/paths.js";
 import { buildResourcesDiscoverHandler } from "./skills/discover.js";
+import { buildAllAgentConfigs } from "./subagents/build-all-configs.js";
 import { loadAgents } from "./subagents/loader.js";
-import { SubagentToolParamsSchema } from "./subagents/schema.js";
-import { executeSubagent, type PiAgentsApi } from "./subagents/tool.js";
 import { TodoToolParamsSchema } from "./todos/schema.js";
 import { reconstructTodos, type SessionEntryLike } from "./todos/state.js";
 import { executeTodos } from "./todos/tool.js";
@@ -22,22 +22,7 @@ type ExtensionAPI = {
 	registerCommand: (name: string, spec: unknown) => void;
 };
 
-async function loadPiAgents(): Promise<PiAgentsApi> {
-	const mod = (await import("pi-agents")) as unknown as Partial<PiAgentsApi>;
-	if (
-		typeof mod.runAgent !== "function" ||
-		typeof mod.executeSingle !== "function" ||
-		typeof mod.executeParallel !== "function"
-	) {
-		throw new Error(
-			"pi-superpowers v5.1 requires pi-agents to be installed. Run: pi install git:github.com/josorio7122/pi-agents",
-		);
-	}
-	return mod as PiAgentsApi;
-}
-
 export default async function superpowersExtension(pi: ExtensionAPI): Promise<void> {
-	const piAgentsApi = await loadPiAgents();
 	const { agents } = await loadAgents();
 
 	const inject = buildInjectHandler({
@@ -58,7 +43,7 @@ export default async function superpowersExtension(pi: ExtensionAPI): Promise<vo
 	}
 
 	pi.on("session_start", (async (_event: unknown, ctx: unknown) => {
-		setSuperpowersStatus(ctx as never, { text: "Superpowers · v5.1.0 · 15 skills · subagents" });
+		setSuperpowersStatus(ctx as never, { text: "Superpowers · v5.4.0 · 14 skills · subagents" });
 		setTimeout(() => {
 			clearSuperpowersStatus(ctx as never);
 		}, 3000);
@@ -89,32 +74,25 @@ export default async function superpowersExtension(pi: ExtensionAPI): Promise<vo
 			executeTodos(ctx as never, params),
 	});
 
-	pi.registerTool({
-		name: "superpowers_subagent",
-		label: "Subagent",
-		description:
-			"Dispatch a named superpowers agent via pi-agents. Modes: single {agent,task}, parallel {tasks:[...]}.",
-		parameters: SubagentToolParamsSchema,
-		// biome-ignore lint/complexity/useMaxParams: pi's tool execute signature is fixed at 5 params
-		execute: (_toolCallId: string, params: unknown, signal: unknown, _onUpdate: unknown, ctx: unknown) => {
-			const anyCtx = ctx as {
-				ui: { colorEnabled?: boolean; width?: number };
-				cwd: string;
-				sessionManager: { getSessionDir: () => string };
-				modelRegistry: unknown;
-			};
-			return executeSubagent({
-				input: params,
-				agents,
-				piAgentsApi,
-				ctx: {
-					ui: anyCtx.ui,
-					cwd: anyCtx.cwd,
-					sessionDir: anyCtx.sessionManager.getSessionDir(),
-					modelRegistry: anyCtx.modelRegistry,
-					...(signal instanceof AbortSignal ? { signal } : {}),
-				},
-			});
-		},
-	});
+	// Register superpowers_subagent once sessionDir is known (session_start).
+	pi.on("session_start", (async (_event: unknown, ctx: unknown) => {
+		const anyCtx = ctx as {
+			cwd: string;
+			sessionManager: { getSessionDir: () => string };
+			modelRegistry: unknown;
+		};
+		const sessionDir = anyCtx.sessionManager.getSessionDir();
+		const { configs, diagnostics } = await buildAllAgentConfigs({ agents, sessionDir });
+		for (const d of diagnostics) {
+			console.error(`[superpowers] agent validation ${d.level}: ${d.filePath}: ${d.message}`);
+		}
+		const base = createAgentTool({
+			agents: configs,
+			modelRegistry: anyCtx.modelRegistry as never,
+			cwd: anyCtx.cwd,
+			sessionDir,
+			conversationLogPath: `${sessionDir}/superpowers/dispatch.jsonl`,
+		});
+		pi.registerTool({ ...base, name: "superpowers_subagent", label: "Subagent" });
+	}) as never);
 }
