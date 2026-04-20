@@ -9,6 +9,11 @@ import { join } from "node:path";
 // or a relative `superpowers/...` under cwd (silent cwd pollution). Neither is
 // acceptable — fall back to a freshly created tmpdir so downstream consumers
 // always see a valid absolute path.
+//
+// TODO: the fallback dir is never cleaned up. Each --no-session run leaks one
+// empty dir under $TMPDIR/pi-superpowers-ephemeral-*. Pi does not yet expose a
+// `session_end` event to hang cleanup off of. When it does (or when we add a
+// process.on("exit") hook), remove the dir only when we created it.
 export async function resolveSessionDir(sessionDir: string): Promise<string> {
 	if (sessionDir !== "") return sessionDir;
 	return mkdtemp(join(tmpdir(), "pi-superpowers-ephemeral-"));
