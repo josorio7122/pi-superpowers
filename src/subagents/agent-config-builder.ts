@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileExists } from "../common/fs.js";
-import { vendorUsingSuperpowersSkill } from "../common/paths.js";
+import type { VendorSkill } from "../skills/scan.js";
 import type { AgentFrontmatterLike } from "./frontmatter.js";
 
 export type PiAgentConfig = {
@@ -28,6 +28,7 @@ export type PiAgentConfig = {
 
 export type BuildCtx = {
 	sessionDir: string;
+	skills: ReadonlyArray<VendorSkill>;
 };
 
 const DEFAULT_TOOLS = ["read", "write", "edit", "bash", "grep", "glob"];
@@ -80,7 +81,7 @@ export async function buildAgentConfig(upstream: AgentFrontmatterLike, ctx: Buil
 			icon: "🦸",
 			domain: [{ path: ".", read: true, write: true, delete: false }],
 			tools,
-			skills: [{ path: vendorUsingSuperpowersSkill(), when: "always" }],
+			skills: ctx.skills.map((s) => ({ path: s.path, when: s.description || "always" })),
 			knowledge: {
 				project: {
 					path: projectPath,

@@ -2,6 +2,7 @@ import { mkdtemp, readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import type { VendorSkill } from "../skills/scan.js";
 import { type BuildCtx, buildAgentConfig } from "./agent-config-builder.js";
 import type { AgentFrontmatterLike } from "./frontmatter.js";
 
@@ -13,8 +14,16 @@ function upstream(overrides: Partial<AgentFrontmatterLike> = {}): AgentFrontmatt
 	return { name: "code-reviewer", body: "You review code.", ...overrides };
 }
 
+function sampleSkills(): VendorSkill[] {
+	return [
+		{ name: "brainstorming", path: "/vendor/skills/brainstorming/SKILL.md", description: "Use for creative work." },
+		{ name: "writing-plans", path: "/vendor/skills/writing-plans/SKILL.md", description: "Use after a spec." },
+		{ name: "no-desc", path: "/vendor/skills/no-desc/SKILL.md", description: "" },
+	];
+}
+
 async function ctx(): Promise<BuildCtx> {
-	return { sessionDir: await tmpSession() };
+	return { sessionDir: await tmpSession(), skills: sampleSkills() };
 }
 
 describe("buildAgentConfig defaults", () => {
@@ -40,19 +49,28 @@ describe("buildAgentConfig defaults", () => {
 		expect(cfg.frontmatter.tools).toEqual(["read", "grep"]);
 	});
 
-	it("sets skills to empty array", async () => {
+	it("emits one skills entry per scanned skill, preserving order", async () => {
 		const cfg = await buildAgentConfig(upstream(), await ctx());
-		expect(cfg.frontmatter.skills).toHaveLength(1);
+		expect(cfg.frontmatter.skills).toHaveLength(3);
+		expect(cfg.frontmatter.skills[0]).toMatchObject({
+			path: "/vendor/skills/brainstorming/SKILL.md",
+			when: "Use for creative work.",
+		});
+		expect(cfg.frontmatter.skills[1]).toMatchObject({
+			path: "/vendor/skills/writing-plans/SKILL.md",
+			when: "Use after a spec.",
+		});
 	});
 
-	it("populates skills with the using-superpowers path when upstream omits it", async () => {
-		const sessionDir = await tmpSession();
-		const config = await buildAgentConfig({ name: "code-reviewer", body: "You are a reviewer." }, { sessionDir });
-		expect(config.frontmatter.skills).toHaveLength(1);
-		expect(config.frontmatter.skills[0]).toMatchObject({
-			path: expect.stringContaining("vendor/superpowers/skills/using-superpowers/SKILL.md"),
-			when: "always",
-		});
+	it("uses 'always' as the when fallback when a scanned skill has no description", async () => {
+		const cfg = await buildAgentConfig(upstream(), await ctx());
+		const noDesc = cfg.frontmatter.skills.find((s) => s.path.endsWith("no-desc/SKILL.md"));
+		expect(noDesc?.when).toBe("always");
+	});
+
+	it("emits an empty skills array when no skills are scanned", async () => {
+		const cfg = await buildAgentConfig(upstream(), { sessionDir: await tmpSession(), skills: [] });
+		expect(cfg.frontmatter.skills).toEqual([]);
 	});
 
 	it("sets conversation.path with {{SESSION_ID}} token and agent name", async () => {
@@ -117,7 +135,7 @@ describe("buildAgentConfig model resolution", () => {
 describe("buildAgentConfig knowledge stubs", () => {
 	it("creates knowledge stub files under sessionDir/superpowers/", async () => {
 		const sessionDir = await tmpSession();
-		const cfg = await buildAgentConfig(upstream(), { sessionDir });
+		const cfg = await buildAgentConfig(upstream(), { sessionDir, skills: sampleSkills() });
 		const projectPath = cfg.frontmatter.knowledge.project.path;
 		const generalPath = cfg.frontmatter.knowledge.general.path;
 		expect(projectPath.startsWith(sessionDir)).toBe(true);
