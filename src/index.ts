@@ -1,11 +1,13 @@
 // Thin pi extension entrypoint. v5.5: consume pi-tasks + pi-agents raw.
 
+import { join } from "node:path";
 import { createAgentTool } from "pi-agents";
 import { createTasksTool } from "pi-tasks";
 import { buildInjectHandler } from "./bootstrap/inject.js";
 import { buildCommandHandler } from "./commands/handler.js";
 import { loadCommands } from "./commands/loader.js";
 import { vendorRoot } from "./common/paths.js";
+import { resolveSessionDir } from "./common/session-dir.js";
 import { buildResourcesDiscoverHandler } from "./skills/discover.js";
 import { buildAllAgentConfigs } from "./subagents/build-all-configs.js";
 import { loadAgents } from "./subagents/loader.js";
@@ -54,7 +56,11 @@ export default async function superpowersExtension(pi: ExtensionAPI): Promise<vo
 			sessionManager: { getSessionDir: () => string };
 			modelRegistry: unknown;
 		};
-		const sessionDir = anyCtx.sessionManager.getSessionDir();
+		const rawSessionDir = anyCtx.sessionManager.getSessionDir();
+		const sessionDir = await resolveSessionDir(rawSessionDir);
+		if (rawSessionDir === "") {
+			console.error(`[superpowers] --no-session detected; using ephemeral dir: ${sessionDir}`);
+		}
 		const { configs, diagnostics } = await buildAllAgentConfigs({ agents, sessionDir });
 		for (const d of diagnostics) {
 			console.error(`[superpowers] agent validation ${d.level}: ${d.filePath}: ${d.message}`);
@@ -65,7 +71,7 @@ export default async function superpowersExtension(pi: ExtensionAPI): Promise<vo
 				modelRegistry: anyCtx.modelRegistry as never,
 				cwd: anyCtx.cwd,
 				sessionDir,
-				conversationLogPath: `${sessionDir}/superpowers/dispatch.jsonl`,
+				conversationLogPath: join(sessionDir, "superpowers", "dispatch.jsonl"),
 			}),
 		);
 	}) as never);
