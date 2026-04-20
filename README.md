@@ -43,6 +43,12 @@ Upstream agent has `model: inherit` but your pi session has no active model. Sel
 ### `Unknown agent: "<name>"`
 `superpowers_subagent` dispatches only agents from `vendor/superpowers/agents/`. Upstream currently ships `code-reviewer`. Run `./scripts/sync-upstream.sh vX.Y.Z` to refresh if a new agent appears upstream.
 
+### Dispatched agents use ~25–30k input tokens of skill baseline per invocation
+As of v5.6, every dispatched subagent gets the full Superpowers skill corpus inlined into its system prompt via the `skills:` frontmatter. That's ~115 KB of skill content (≈25–30k tokens) per agent call. Parallel dispatches multiply this cost. This is the explicit tradeoff for dispatched agents having full skill access without a runtime `Skill` tool — see `docs/specs/2026-04-20-v5.6-dynamic-skill-frontmatter-design.md`.
+
+### `--no-session` creates an ephemeral `pi-superpowers-ephemeral-*` tmpdir
+When pi runs with `--no-session` (used by our e2e runner and by ad-hoc one-shot invocations), `sessionManager.getSessionDir()` returns an empty string. v5.6 falls back to `mkdtemp("pi-superpowers-ephemeral-")` under `$TMPDIR` so dispatched agents still work. The fallback dir is **not automatically cleaned up**; it's small (just a couple of knowledge stubs and a dispatch log) but accumulates across runs. If it becomes annoying, `rm -rf $TMPDIR/pi-superpowers-ephemeral-*` is safe once no pi session is active.
+
 ## Updating superpowers
 
 See [`docs/sync-playbook.md`](docs/sync-playbook.md) for the full workflow, including what the parity-check guards against. Quick version:
