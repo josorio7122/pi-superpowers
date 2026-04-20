@@ -6,12 +6,12 @@ import { scanVendorSkills } from "./scan.js";
 
 let tmp: string;
 
-async function writeSkill(root: string, name: string, description: string): Promise<void> {
-	const dir = join(root, name);
+async function writeSkill(opts: { root: string; name: string; description: string }): Promise<void> {
+	const dir = join(opts.root, opts.name);
 	await mkdir(dir, { recursive: true });
 	await writeFile(
 		join(dir, "SKILL.md"),
-		`---\nname: ${name}\ndescription: ${description}\n---\n\nBody of ${name}.\n`,
+		`---\nname: ${opts.name}\ndescription: ${opts.description}\n---\n\nBody of ${opts.name}.\n`,
 	);
 }
 
@@ -21,18 +21,14 @@ beforeEach(async () => {
 
 describe("scanVendorSkills", () => {
 	it("returns every skill directory sorted alphabetically by name", async () => {
-		await writeSkill(tmp, "writing-plans", "Use when you have a spec.");
-		await writeSkill(tmp, "brainstorming", "Use for creative work.");
-		await writeSkill(tmp, "test-driven-development", "Use when implementing.");
+		await writeSkill({ root: tmp, name: "writing-plans", description: "Use when you have a spec." });
+		await writeSkill({ root: tmp, name: "brainstorming", description: "Use for creative work." });
+		await writeSkill({ root: tmp, name: "test-driven-development", description: "Use when implementing." });
 
 		const result = await scanVendorSkills(tmp);
 
 		expect(result.diagnostics).toEqual([]);
-		expect(result.skills.map((s) => s.name)).toEqual([
-			"brainstorming",
-			"test-driven-development",
-			"writing-plans",
-		]);
+		expect(result.skills.map((s) => s.name)).toEqual(["brainstorming", "test-driven-development", "writing-plans"]);
 		expect(result.skills[0]).toMatchObject({
 			name: "brainstorming",
 			path: join(tmp, "brainstorming", "SKILL.md"),
