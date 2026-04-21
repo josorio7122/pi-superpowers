@@ -6,13 +6,15 @@ adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [5.7.0] — 2026-04-21
+
 ### Added
 - Repo harness parity with pi-agents / pi-tasks: `AGENTS.md`,
   `CONTRIBUTING.md`, `LICENSE`, `CODE_OF_CONDUCT.md`, `SECURITY.md`,
   `CHANGELOG.md`, GitHub CI (`check.yml`), dependabot, issue templates,
   `CODEOWNERS`, pre-commit via `simple-git-hooks` + `lint-staged`,
   `scripts/check-blank-lines.sh` wired into `npm run check`, dedicated
-  `vitest.e2e.config.ts`.
+  `vitest.e2e.config.ts`, `engines.node >= 20`, `files` array.
 
 ### Changed
 - Stricter `tsconfig.json`: `target: ES2025`, `module: NodeNext`,
@@ -23,6 +25,8 @@ adheres to [Semantic Versioning](https://semver.org/).
   `suspicious.noExplicitAny`, `complexity.noExcessiveCognitiveComplexity`,
   `style.useImportType`), `src/api.ts` + `**/*.test.ts` overrides.
 - Root-level design docs moved under `docs/specs/`.
+- `test:e2e` / `test:e2e:full` scripts now discover tests via
+  `vitest.e2e.config.ts` pattern instead of hard-coded file lists.
 
 ## [5.6.0] — 2026-04-20
 
