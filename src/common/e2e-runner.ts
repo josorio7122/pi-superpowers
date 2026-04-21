@@ -54,6 +54,7 @@ function spawnPi(props: SpawnPiProps): Promise<SpawnResult> {
     proc.stderr.on("data", (d) => {
       err += d.toString();
     });
+
     const timer = setTimeout(() => {
       proc.kill("SIGTERM");
       reject(new Error(`pi timed out after ${timeoutMs}ms\nstderr: ${err}`));
