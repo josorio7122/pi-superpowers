@@ -35,7 +35,16 @@
     "parity-check": "tsx scripts/parity-check.ts",
     "sync-upstream": "bash scripts/sync-upstream.sh",
     "simulate-ui": "tsx scripts/simulate-ui.ts",
-    "simulate-ui:all": "tsx scripts/simulate-ui.ts all"
+    "simulate-ui:all": "tsx scripts/simulate-ui.ts all",
+    "prepare": "simple-git-hooks"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "npx lint-staged"
+  },
+  "lint-staged": {
+    "src/**/*.ts": [
+      "biome check --fix --no-errors-on-unmatched"
+    ]
   },
   "peerDependencies": {
     "@mariozechner/pi-coding-agent": "*"
@@ -50,6 +59,8 @@
   "devDependencies": {
     "@biomejs/biome": "^2.4.10",
     "@types/node": "^25.5.0",
+    "lint-staged": "^16.4.0",
+    "simple-git-hooks": "^2.13.1",
     "tsx": "^4.21.0",
     "typescript": "^6.0.2",
     "vitest": "^4.1.2"
