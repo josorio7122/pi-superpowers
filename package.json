@@ -46,6 +46,16 @@
       "biome check --fix --no-errors-on-unmatched"
     ]
   },
+  "engines": {
+    "node": ">=20"
+  },
+  "files": [
+    "src",
+    "vendor",
+    "CHANGELOG.md",
+    "LICENSE",
+    "README.md"
+  ],
   "peerDependencies": {
     "@mariozechner/pi-coding-agent": "*"
   },
