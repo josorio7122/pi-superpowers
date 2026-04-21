@@ -1,6 +1,5 @@
 // Width-aware truncation and wrapping. All functions are ANSI-safe.
 
-// biome-ignore lint/suspicious/noControlCharactersInRegex: ANSI escape sequences start with ESC (0x1b) by definition
 const ANSI_RE = /\u001b\[[0-9;]*m/g;
 
 export function visibleLength(s: string): number {
