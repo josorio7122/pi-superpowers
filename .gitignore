@@ -8,3 +8,5 @@ coverage/
 # Subagent knowledge stubs created at runtime under sessionDir
 superpowers/
 .pi/
+.worktrees/
+worktrees/
