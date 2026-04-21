@@ -5,11 +5,11 @@
 export type { AddendumOptions } from "./bootstrap/addendum.js";
 export { renderPiAddendum } from "./bootstrap/addendum.js";
 export type {
-	InjectCtx,
-	InjectEvent,
-	InjectHandler,
-	InjectOptions,
-	InjectResult,
+  InjectCtx,
+  InjectEvent,
+  InjectHandler,
+  InjectOptions,
+  InjectResult,
 } from "./bootstrap/inject.js";
 export { buildInjectHandler } from "./bootstrap/inject.js";
 

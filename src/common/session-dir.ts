@@ -15,6 +15,6 @@ import { join } from "node:path";
 // `session_end` event to hang cleanup off of. When it does (or when we add a
 // process.on("exit") hook), remove the dir only when we created it.
 export async function resolveSessionDir(sessionDir: string): Promise<string> {
-	if (sessionDir !== "") return sessionDir;
-	return mkdtemp(join(tmpdir(), "pi-superpowers-ephemeral-"));
+  if (sessionDir !== "") return sessionDir;
+  return mkdtemp(join(tmpdir(), "pi-superpowers-ephemeral-"));
 }

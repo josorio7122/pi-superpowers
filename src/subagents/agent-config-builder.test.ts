@@ -7,161 +7,161 @@ import { type BuildCtx, buildAgentConfig } from "./agent-config-builder.js";
 import type { AgentFrontmatterLike } from "./frontmatter.js";
 
 async function tmpSession(): Promise<string> {
-	return mkdtemp(join(tmpdir(), "pisup-sess-"));
+  return mkdtemp(join(tmpdir(), "pisup-sess-"));
 }
 
 function upstream(overrides: Partial<AgentFrontmatterLike> = {}): AgentFrontmatterLike {
-	return { name: "code-reviewer", body: "You review code.", ...overrides };
+  return { name: "code-reviewer", body: "You review code.", ...overrides };
 }
 
 function sampleSkills(): VendorSkill[] {
-	return [
-		{ name: "brainstorming", path: "/vendor/skills/brainstorming/SKILL.md", description: "Use for creative work." },
-		{ name: "writing-plans", path: "/vendor/skills/writing-plans/SKILL.md", description: "Use after a spec." },
-		{ name: "no-desc", path: "/vendor/skills/no-desc/SKILL.md", description: "" },
-	];
+  return [
+    { name: "brainstorming", path: "/vendor/skills/brainstorming/SKILL.md", description: "Use for creative work." },
+    { name: "writing-plans", path: "/vendor/skills/writing-plans/SKILL.md", description: "Use after a spec." },
+    { name: "no-desc", path: "/vendor/skills/no-desc/SKILL.md", description: "" },
+  ];
 }
 
 async function ctx(): Promise<BuildCtx> {
-	return { sessionDir: await tmpSession(), skills: sampleSkills() };
+  return { sessionDir: await tmpSession(), skills: sampleSkills() };
 }
 
 describe("buildAgentConfig defaults", () => {
-	it("synthesizes role, color, icon when upstream omits them", async () => {
-		const cfg = await buildAgentConfig(upstream(), await ctx());
-		expect(cfg.frontmatter.role).toBe("worker");
-		expect(cfg.frontmatter.color).toBe("#f5a623");
-		expect(cfg.frontmatter.icon).toBe("🦸");
-	});
+  it("synthesizes role, color, icon when upstream omits them", async () => {
+    const cfg = await buildAgentConfig(upstream(), await ctx());
+    expect(cfg.frontmatter.role).toBe("worker");
+    expect(cfg.frontmatter.color).toBe("#f5a623");
+    expect(cfg.frontmatter.icon).toBe("🦸");
+  });
 
-	it("synthesizes domain with cwd read+write and no-delete", async () => {
-		const cfg = await buildAgentConfig(upstream(), await ctx());
-		expect(cfg.frontmatter.domain).toEqual([{ path: ".", read: true, write: true, delete: false }]);
-	});
+  it("synthesizes domain with cwd read+write and no-delete", async () => {
+    const cfg = await buildAgentConfig(upstream(), await ctx());
+    expect(cfg.frontmatter.domain).toEqual([{ path: ".", read: true, write: true, delete: false }]);
+  });
 
-	it("falls back to default tool set when upstream has no tools", async () => {
-		const cfg = await buildAgentConfig(upstream(), await ctx());
-		expect(cfg.frontmatter.tools).toEqual(["read", "write", "edit", "bash", "grep", "glob"]);
-	});
+  it("falls back to default tool set when upstream has no tools", async () => {
+    const cfg = await buildAgentConfig(upstream(), await ctx());
+    expect(cfg.frontmatter.tools).toEqual(["read", "write", "edit", "bash", "grep", "glob"]);
+  });
 
-	it("uses upstream tools when provided", async () => {
-		const cfg = await buildAgentConfig(upstream({ tools: ["read", "grep"] }), await ctx());
-		expect(cfg.frontmatter.tools).toEqual(["read", "grep"]);
-	});
+  it("uses upstream tools when provided", async () => {
+    const cfg = await buildAgentConfig(upstream({ tools: ["read", "grep"] }), await ctx());
+    expect(cfg.frontmatter.tools).toEqual(["read", "grep"]);
+  });
 
-	it("emits one skills entry per scanned skill, preserving order", async () => {
-		const cfg = await buildAgentConfig(upstream(), await ctx());
-		expect(cfg.frontmatter.skills).toHaveLength(3);
-		expect(cfg.frontmatter.skills[0]).toMatchObject({
-			path: "/vendor/skills/brainstorming/SKILL.md",
-			when: "Use for creative work.",
-		});
-		expect(cfg.frontmatter.skills[1]).toMatchObject({
-			path: "/vendor/skills/writing-plans/SKILL.md",
-			when: "Use after a spec.",
-		});
-	});
+  it("emits one skills entry per scanned skill, preserving order", async () => {
+    const cfg = await buildAgentConfig(upstream(), await ctx());
+    expect(cfg.frontmatter.skills).toHaveLength(3);
+    expect(cfg.frontmatter.skills[0]).toMatchObject({
+      path: "/vendor/skills/brainstorming/SKILL.md",
+      when: "Use for creative work.",
+    });
+    expect(cfg.frontmatter.skills[1]).toMatchObject({
+      path: "/vendor/skills/writing-plans/SKILL.md",
+      when: "Use after a spec.",
+    });
+  });
 
-	it("uses 'always' as the when fallback when a scanned skill has no description", async () => {
-		const cfg = await buildAgentConfig(upstream(), await ctx());
-		const noDesc = cfg.frontmatter.skills.find((s) => s.path.endsWith("no-desc/SKILL.md"));
-		expect(noDesc?.when).toBe("always");
-	});
+  it("uses 'always' as the when fallback when a scanned skill has no description", async () => {
+    const cfg = await buildAgentConfig(upstream(), await ctx());
+    const noDesc = cfg.frontmatter.skills.find((s) => s.path.endsWith("no-desc/SKILL.md"));
+    expect(noDesc?.when).toBe("always");
+  });
 
-	it("emits an empty skills array when no skills are scanned", async () => {
-		const cfg = await buildAgentConfig(upstream(), { sessionDir: await tmpSession(), skills: [] });
-		expect(cfg.frontmatter.skills).toEqual([]);
-	});
+  it("emits an empty skills array when no skills are scanned", async () => {
+    const cfg = await buildAgentConfig(upstream(), { sessionDir: await tmpSession(), skills: [] });
+    expect(cfg.frontmatter.skills).toEqual([]);
+  });
 
-	it("sets conversation.path with {{SESSION_ID}} token and agent name", async () => {
-		const cfg = await buildAgentConfig(upstream(), await ctx());
-		expect(cfg.frontmatter.conversation.path).toContain("{{SESSION_ID}}");
-		expect(cfg.frontmatter.conversation.path).toContain("code-reviewer");
-	});
+  it("sets conversation.path with {{SESSION_ID}} token and agent name", async () => {
+    const cfg = await buildAgentConfig(upstream(), await ctx());
+    expect(cfg.frontmatter.conversation.path).toContain("{{SESSION_ID}}");
+    expect(cfg.frontmatter.conversation.path).toContain("code-reviewer");
+  });
 });
 
 describe("buildAgentConfig model resolution", () => {
-	it("passes through upstream model when valid format", async () => {
-		const cfg = await buildAgentConfig(upstream({ model: "anthropic/claude-opus-4" }), await ctx());
-		expect(cfg.frontmatter.model).toBe("anthropic/claude-opus-4");
-	});
+  it("passes through upstream model when valid format", async () => {
+    const cfg = await buildAgentConfig(upstream({ model: "anthropic/claude-opus-4" }), await ctx());
+    expect(cfg.frontmatter.model).toBe("anthropic/claude-opus-4");
+  });
 
-	it("resolves 'inherit' to pinned default openai-codex/gpt-5.4 (NOT ctx.modelId)", async () => {
-		const cfg = await buildAgentConfig(upstream({ model: "inherit" }), await ctx());
-		expect(cfg.frontmatter.model).toBe("openai-codex/gpt-5.4");
-	});
+  it("resolves 'inherit' to pinned default openai-codex/gpt-5.4 (NOT ctx.modelId)", async () => {
+    const cfg = await buildAgentConfig(upstream({ model: "inherit" }), await ctx());
+    expect(cfg.frontmatter.model).toBe("openai-codex/gpt-5.4");
+  });
 
-	it("resolves missing upstream model to pinned default", async () => {
-		const cfg = await buildAgentConfig(upstream(), await ctx());
-		expect(cfg.frontmatter.model).toBe("openai-codex/gpt-5.4");
-	});
+  it("resolves missing upstream model to pinned default", async () => {
+    const cfg = await buildAgentConfig(upstream(), await ctx());
+    expect(cfg.frontmatter.model).toBe("openai-codex/gpt-5.4");
+  });
 
-	it("SUPERPOWERS_AGENT_MODEL env var overrides pinned default", async () => {
-		process.env.SUPERPOWERS_AGENT_MODEL = "anthropic/claude-sonnet-4-5";
-		try {
-			const cfg = await buildAgentConfig(upstream({ model: "inherit" }), await ctx());
-			expect(cfg.frontmatter.model).toBe("anthropic/claude-sonnet-4-5");
-		} finally {
-			delete process.env.SUPERPOWERS_AGENT_MODEL;
-		}
-	});
+  it("SUPERPOWERS_AGENT_MODEL env var overrides pinned default", async () => {
+    process.env.SUPERPOWERS_AGENT_MODEL = "anthropic/claude-sonnet-4-5";
+    try {
+      const cfg = await buildAgentConfig(upstream({ model: "inherit" }), await ctx());
+      expect(cfg.frontmatter.model).toBe("anthropic/claude-sonnet-4-5");
+    } finally {
+      delete process.env.SUPERPOWERS_AGENT_MODEL;
+    }
+  });
 
-	it("SUPERPOWERS_AGENT_MODEL env var overrides explicit upstream model too", async () => {
-		process.env.SUPERPOWERS_AGENT_MODEL = "anthropic/claude-opus-4";
-		try {
-			const cfg = await buildAgentConfig(upstream({ model: "openai-codex/gpt-4o" }), await ctx());
-			expect(cfg.frontmatter.model).toBe("anthropic/claude-opus-4");
-		} finally {
-			delete process.env.SUPERPOWERS_AGENT_MODEL;
-		}
-	});
+  it("SUPERPOWERS_AGENT_MODEL env var overrides explicit upstream model too", async () => {
+    process.env.SUPERPOWERS_AGENT_MODEL = "anthropic/claude-opus-4";
+    try {
+      const cfg = await buildAgentConfig(upstream({ model: "openai-codex/gpt-4o" }), await ctx());
+      expect(cfg.frontmatter.model).toBe("anthropic/claude-opus-4");
+    } finally {
+      delete process.env.SUPERPOWERS_AGENT_MODEL;
+    }
+  });
 
-	it("throws on invalid SUPERPOWERS_AGENT_MODEL format", async () => {
-		process.env.SUPERPOWERS_AGENT_MODEL = "bogus";
-		try {
-			await expect(buildAgentConfig(upstream({ model: "inherit" }), await ctx())).rejects.toThrow(
-				/invalid SUPERPOWERS_AGENT_MODEL/i,
-			);
-		} finally {
-			delete process.env.SUPERPOWERS_AGENT_MODEL;
-		}
-	});
+  it("throws on invalid SUPERPOWERS_AGENT_MODEL format", async () => {
+    process.env.SUPERPOWERS_AGENT_MODEL = "bogus";
+    try {
+      await expect(buildAgentConfig(upstream({ model: "inherit" }), await ctx())).rejects.toThrow(
+        /invalid SUPERPOWERS_AGENT_MODEL/i,
+      );
+    } finally {
+      delete process.env.SUPERPOWERS_AGENT_MODEL;
+    }
+  });
 
-	it("throws when upstream model doesn't match provider/model format and isn't 'inherit'", async () => {
-		await expect(buildAgentConfig(upstream({ model: "bogus" }), await ctx())).rejects.toThrow();
-	});
+  it("throws when upstream model doesn't match provider/model format and isn't 'inherit'", async () => {
+    await expect(buildAgentConfig(upstream({ model: "bogus" }), await ctx())).rejects.toThrow();
+  });
 });
 
 describe("buildAgentConfig knowledge stubs", () => {
-	it("creates knowledge stub files under sessionDir/superpowers/", async () => {
-		const sessionDir = await tmpSession();
-		const cfg = await buildAgentConfig(upstream(), { sessionDir, skills: sampleSkills() });
-		const projectPath = cfg.frontmatter.knowledge.project.path;
-		const generalPath = cfg.frontmatter.knowledge.general.path;
-		expect(projectPath.startsWith(sessionDir)).toBe(true);
-		expect(generalPath.startsWith(sessionDir)).toBe(true);
-		const p = await readFile(projectPath, "utf8");
-		const g = await readFile(generalPath, "utf8");
-		expect(typeof p).toBe("string");
-		expect(typeof g).toBe("string");
-	});
+  it("creates knowledge stub files under sessionDir/superpowers/", async () => {
+    const sessionDir = await tmpSession();
+    const cfg = await buildAgentConfig(upstream(), { sessionDir, skills: sampleSkills() });
+    const projectPath = cfg.frontmatter.knowledge.project.path;
+    const generalPath = cfg.frontmatter.knowledge.general.path;
+    expect(projectPath.startsWith(sessionDir)).toBe(true);
+    expect(generalPath.startsWith(sessionDir)).toBe(true);
+    const p = await readFile(projectPath, "utf8");
+    const g = await readFile(generalPath, "utf8");
+    expect(typeof p).toBe("string");
+    expect(typeof g).toBe("string");
+  });
 
-	it("is idempotent — second call does not fail if files exist", async () => {
-		const c = await ctx();
-		await buildAgentConfig(upstream(), c);
-		await expect(buildAgentConfig(upstream(), c)).resolves.toBeDefined();
-	});
+  it("is idempotent — second call does not fail if files exist", async () => {
+    const c = await ctx();
+    await buildAgentConfig(upstream(), c);
+    await expect(buildAgentConfig(upstream(), c)).resolves.toBeDefined();
+  });
 });
 
 describe("buildAgentConfig result shape", () => {
-	it("returns systemPrompt equal to upstream body", async () => {
-		const cfg = await buildAgentConfig(upstream({ body: "Hello world." }), await ctx());
-		expect(cfg.systemPrompt).toBe("Hello world.");
-	});
+  it("returns systemPrompt equal to upstream body", async () => {
+    const cfg = await buildAgentConfig(upstream({ body: "Hello world." }), await ctx());
+    expect(cfg.systemPrompt).toBe("Hello world.");
+  });
 
-	it("sets source='user' and filePath pointer", async () => {
-		const cfg = await buildAgentConfig(upstream(), await ctx());
-		expect(cfg.source).toBe("user");
-		expect(cfg.filePath).toContain("code-reviewer");
-	});
+  it("sets source='user' and filePath pointer", async () => {
+    const cfg = await buildAgentConfig(upstream(), await ctx());
+    expect(cfg.source).toBe("user");
+    expect(cfg.filePath).toContain("code-reviewer");
+  });
 });

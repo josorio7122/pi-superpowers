@@ -6,25 +6,25 @@ const here = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(here, "..", "..");
 
 export function packageRoot(): string {
-	return ROOT;
+  return ROOT;
 }
 
 export function vendorRoot(): string {
-	return resolve(ROOT, "vendor", "superpowers");
+  return resolve(ROOT, "vendor", "superpowers");
 }
 
 export function vendorSkillsDir(): string {
-	return resolve(vendorRoot(), "skills");
+  return resolve(vendorRoot(), "skills");
 }
 
 export function vendorAgentsDir(): string {
-	return resolve(vendorRoot(), "agents");
+  return resolve(vendorRoot(), "agents");
 }
 
 export function vendorUsingSuperpowersSkill(): string {
-	return resolve(vendorSkillsDir(), "using-superpowers", "SKILL.md");
+  return resolve(vendorSkillsDir(), "using-superpowers", "SKILL.md");
 }
 
 export function vendorCommandsDir(): string {
-	return resolve(vendorRoot(), "commands");
+  return resolve(vendorRoot(), "commands");
 }
