@@ -22,10 +22,10 @@
     ]
   },
   "scripts": {
-    "test": "vitest run --exclude 'src/**/*-e2e.test.ts'",
+    "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "vitest run src/bootstrap/inject-e2e.test.ts src/ui/status-e2e.test.ts src/ui/widget-e2e.test.ts src/skills/skill-broadcast-e2e.test.ts",
-    "test:e2e:full": "vitest run src/bootstrap/inject-e2e.test.ts src/ui/status-e2e.test.ts src/ui/widget-e2e.test.ts src/skills/skill-broadcast-e2e.test.ts src/multi-session/",
+    "test:e2e": "PI_E2E=1 vitest run --config vitest.e2e.config.ts",
+    "test:e2e:full": "PI_E2E=1 E2E_FULL=1 vitest run --config vitest.e2e.config.ts",
     "typecheck": "tsc --noEmit",
     "lint": "biome check src/",
     "lint:fix": "biome check --fix src/",
