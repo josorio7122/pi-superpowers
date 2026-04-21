@@ -1,0 +1,45 @@
+name: Feature request
+description: Suggest an enhancement to pi-superpowers.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the idea! Please check the [Contributing guide](../../CONTRIBUTING.md#what-belongs-in-pi-superpowers) first — some proposals belong upstream or in a separate pi-package.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What user pain does this solve? Why is the current behavior insufficient?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Concrete shape — bootstrap addendum change, subagent behavior, skill loader extension, TUI surface, etc.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Other approaches you thought about and why you rejected them.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope confirmation
+      description: Please confirm this proposal belongs in pi-superpowers.
+      options:
+        - label: "This affects bootstrap, subagent dispatch, skill broadcast, or pi-superpowers-specific TUI (in scope)."
+        - label: "This is an upstream Superpowers skill change (belongs in [obra/superpowers](https://github.com/obra/superpowers))."
+        - label: "This is pi-core / pi-tui functionality (upstream to [pi-mono](https://github.com/badlogic/pi-mono))."
+        - label: "This belongs in pi-agents or pi-tasks (generic infrastructure)."
+    validations:
+      required: true
