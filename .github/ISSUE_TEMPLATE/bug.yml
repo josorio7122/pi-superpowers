@@ -22,7 +22,7 @@ body:
       label: Steps to reproduce
       description: Minimal pi session setup + tool calls that trigger the bug.
       placeholder: |
-        1. Start pi with `pi install git:github.com/josorio7122/pi-superpowers@v5.6.0`
+        1. Start pi with `pi install git:github.com/josorio7122/pi-superpowers@v0.1.0`
         2. Invoke `superpowers_subagent` with `{ agent: "code-reviewer", task: "..." }`
         3. Observe…
     validations:
@@ -40,7 +40,7 @@ body:
     attributes:
       label: pi-superpowers version
       description: Output of `git describe --tags` or the tag you installed.
-      placeholder: v5.6.0
+      placeholder: v0.1.0
     validations:
       required: true
 

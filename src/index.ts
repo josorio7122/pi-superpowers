@@ -1,4 +1,4 @@
-// Thin pi extension entrypoint. v5.5: consume pi-tasks + pi-agents raw.
+// Thin pi extension entrypoint. Consumes pi-tasks + pi-agents raw.
 
 import { join } from "node:path";
 import { createAgentTool } from "pi-agents";
@@ -40,7 +40,7 @@ export default async function superpowersExtension(pi: ExtensionAPI): Promise<vo
   }
 
   pi.on("session_start", (async (_event: unknown, ctx: unknown) => {
-    setSuperpowersStatus(ctx as never, { text: "Superpowers · v5.6.0 · 14 skills · tasks + agents" });
+    setSuperpowersStatus(ctx as never, { text: "Superpowers · 14 skills · tasks + agents" });
     setTimeout(() => {
       clearSuperpowersStatus(ctx as never);
     }, 3000);

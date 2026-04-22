@@ -2,12 +2,12 @@
 
 [Superpowers](https://github.com/obra/superpowers) skills library as a native pi package — with full subagent support.
 
-v5.5 consumes pi-tasks + pi-agents raw: 14 skills + 3 commands + 1 agent auto-registered from `vendor/superpowers/`, first-turn bootstrap, native `task` tool (pi-tasks) with in_progress discipline, native `agent` tool (pi-agents) with live streaming + abort.
+Consumes pi-tasks + pi-agents raw: 14 skills + 3 commands + 1 agent auto-registered from `vendor/superpowers/`, first-turn bootstrap, native `task` tool (pi-tasks) with in_progress discipline, native `agent` tool (pi-agents) with live streaming + abort.
 
 ## Install
 
 ```bash
-pi install git:github.com/josorio7122/pi-superpowers@v5.5.0
+pi install git:github.com/josorio7122/pi-superpowers@v0.1.0
 ```
 
 `pi-agents` is bundled as a regular npm dependency — no separate install needed. If you later want to share a single pi-agents install across multiple packages, move it to your pi settings and it'll dedupe via npm.
@@ -30,7 +30,7 @@ The `-e` flag loads the extension directly from source with no install — great
 | **`/todos` interactive picker** | Type `/todos` in pi interactive mode — `j/k` nav, `space` toggle, `a` add, `x` remove, `1/2/3` priority, `q` quit |
 | **`superpowers_subagent` tool** | Single: `{ agent, task }`. Parallel: `{ tasks: [...] }`. Chain: `{ chain: [...] }` with `{previous}` substitution |
 | **Persistent todo widget** | Above-editor widget showing progress bar + current in-progress item; survives `/compact` |
-| **Session-start status** | Footer shows `🦸 Superpowers · v5.5.0 · 14 skills · tasks + agents` on session start |
+| **Session-start status** | Footer shows `🦸 Superpowers · 14 skills · tasks + agents` on session start |
 
 ## Troubleshooting
 
@@ -44,10 +44,10 @@ Upstream agent has `model: inherit` but your pi session has no active model. Sel
 `superpowers_subagent` dispatches only agents from `vendor/superpowers/agents/`. Upstream currently ships `code-reviewer`. Run `./scripts/sync-upstream.sh vX.Y.Z` to refresh if a new agent appears upstream.
 
 ### Dispatched agents use ~25–30k input tokens of skill baseline per invocation
-As of v5.6, every dispatched subagent gets the full Superpowers skill corpus inlined into its system prompt via the `skills:` frontmatter. That's ~115 KB of skill content (≈25–30k tokens) per agent call. Parallel dispatches multiply this cost. This is the explicit tradeoff for dispatched agents having full skill access without a runtime `Skill` tool — see `docs/specs/2026-04-20-v5.6-dynamic-skill-frontmatter-design.md`.
+Every dispatched subagent gets the full Superpowers skill corpus inlined into its system prompt via the `skills:` frontmatter. That's ~115 KB of skill content (≈25–30k tokens) per agent call. Parallel dispatches multiply this cost. This is the explicit tradeoff for dispatched agents having full skill access without a runtime `Skill` tool — see `docs/specs/2026-04-20-v5.6-dynamic-skill-frontmatter-design.md`.
 
 ### `--no-session` creates an ephemeral `pi-superpowers-ephemeral-*` tmpdir
-When pi runs with `--no-session` (used by our e2e runner and by ad-hoc one-shot invocations), `sessionManager.getSessionDir()` returns an empty string. v5.6 falls back to `mkdtemp("pi-superpowers-ephemeral-")` under `$TMPDIR` so dispatched agents still work. The fallback dir is **not automatically cleaned up**; it's small (just a couple of knowledge stubs and a dispatch log) but accumulates across runs. If it becomes annoying, `rm -rf $TMPDIR/pi-superpowers-ephemeral-*` is safe once no pi session is active.
+When pi runs with `--no-session` (used by our e2e runner and by ad-hoc one-shot invocations), `sessionManager.getSessionDir()` returns an empty string. pi-superpowers falls back to `mkdtemp("pi-superpowers-ephemeral-")` under `$TMPDIR` so dispatched agents still work. The fallback dir is **not automatically cleaned up**; it's small (just a couple of knowledge stubs and a dispatch log) but accumulates across runs. If it becomes annoying, `rm -rf $TMPDIR/pi-superpowers-ephemeral-*` is safe once no pi session is active.
 
 ## Updating superpowers
 
@@ -90,7 +90,7 @@ Tweak `src/ui/tree.ts` or any `src/*/render.ts` and re-run to see changes live. 
 
 ## Architecture
 
-See [`docs/specs/2026-04-23-v5.1-feature-complete-design.md`](docs/specs/2026-04-23-v5.1-feature-complete-design.md).
+See the feature-complete design in [`docs/specs/2026-04-23-v5.1-feature-complete-design.md`](docs/specs/2026-04-23-v5.1-feature-complete-design.md) (filename carries the historical v5.1 label; content is current).
 
 ## License
 
