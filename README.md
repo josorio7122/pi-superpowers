@@ -2,7 +2,7 @@
 
 [Superpowers](https://github.com/obra/superpowers) skills library as a native pi package — with full subagent support.
 
-Consumes pi-tasks + pi-agents raw: 14 skills + 3 commands + 1 agent auto-registered from `vendor/superpowers/`, first-turn bootstrap, native `task` tool (pi-tasks) with in_progress discipline, native `agent` tool (pi-agents) with live streaming + abort.
+Consumes pi-tasks + pi-agents raw: 14 skills + 3 commands + 1 agent auto-registered from `vendor/superpowers/`, first-turn bootstrap, native `task` tool (pi-tasks) with in_progress discipline, native `agent` tool (pi-agents) with live streaming + abort. Dispatched subagents use pi's native **progressive skill disclosure** — only skill descriptions ship in the system prompt; bodies load on demand via `read`.
 
 ## Install
 
@@ -24,11 +24,12 @@ The `-e` flag loads the extension directly from source with no install — great
 
 | Feature | How to use |
 |---|---|
-| **15 superpowers skills** | `/skill:brainstorming`, `/skill:writing-plans`, etc. |
+| **14 superpowers skills** | `/skill:brainstorming`, `/skill:writing-plans`, etc. |
 | **First-turn bootstrap** | Automatic — injects `using-superpowers` + pi tool mapping on every new pi session |
-| **`superpowers_todo` tool** | Model calls with `{ action: "add", content: "..." }` and variants: replace, update, complete, remove, clear, list |
-| **`/todos` interactive picker** | Type `/todos` in pi interactive mode — `j/k` nav, `space` toggle, `a` add, `x` remove, `1/2/3` priority, `q` quit |
-| **`superpowers_subagent` tool** | Single: `{ agent, task }`. Parallel: `{ tasks: [...] }`. Chain: `{ chain: [...] }` with `{previous}` substitution |
+| **`task` tool** | Model calls with `{ action: "add", content: "..." }` and variants: replace, update, complete, remove, clear, list |
+| **`agent` tool** | Single: `{ agent, task }`. Parallel: `{ tasks: [...] }`. Chain: `{ chain: [...] }` with `{previous}` substitution |
+| **Progressive skill disclosure** | Dispatched agents receive a compact `<skills>` XML manifest (name + description + path) per [agentskills.io](https://agentskills.io/integrate-skills); bodies load via `read` on demand |
+| **Model inheritance** | Dispatched subagents run on the parent session's current model unless overridden upstream; `SUPERPOWERS_AGENT_MODEL` env var also supported |
 | **Persistent todo widget** | Above-editor widget showing progress bar + current in-progress item; survives `/compact` |
 | **Session-start status** | Footer shows `🦸 Superpowers · 14 skills · tasks + agents` on session start |
 
@@ -43,11 +44,11 @@ Upstream agent has `model: inherit` but your pi session has no active model. Sel
 ### `Unknown agent: "<name>"`
 `superpowers_subagent` dispatches only agents from `vendor/superpowers/agents/`. Upstream currently ships `code-reviewer`. Run `./scripts/sync-upstream.sh vX.Y.Z` to refresh if a new agent appears upstream.
 
-### Dispatched agents use ~25–30k input tokens of skill baseline per invocation
-Every dispatched subagent gets the full Superpowers skill corpus inlined into its system prompt via the `skills:` frontmatter. That's ~115 KB of skill content (≈25–30k tokens) per agent call. Parallel dispatches multiply this cost. This is the explicit tradeoff for dispatched agents having full skill access without a runtime `Skill` tool.
+### Dispatched agent didn't load the skill it needed
+Pi's progressive disclosure relies on the model choosing to `read` a skill's `SKILL.md` when the manifest description looks relevant. Capable models (Sonnet/Opus-class) handle this reliably; cheaper models sometimes skip the `read` and operate on description alone. If a dispatched agent's output feels shallow, prompt it explicitly: "Read the `brainstorming` skill before you start" or "Use the `test-driven-development` skill."
 
 ### `--no-session` creates an ephemeral `pi-superpowers-ephemeral-*` tmpdir
-When pi runs with `--no-session` (used by our e2e runner and by ad-hoc one-shot invocations), `sessionManager.getSessionDir()` returns an empty string. pi-superpowers falls back to `mkdtemp("pi-superpowers-ephemeral-")` under `$TMPDIR` so dispatched agents still work. The fallback dir is **not automatically cleaned up**; it's small (just a couple of knowledge stubs and a dispatch log) but accumulates across runs. If it becomes annoying, `rm -rf $TMPDIR/pi-superpowers-ephemeral-*` is safe once no pi session is active.
+When pi runs with `--no-session` (used by our e2e runner and by ad-hoc one-shot invocations), `sessionManager.getSessionDir()` returns an empty string. pi-superpowers falls back to `mkdtemp("pi-superpowers-ephemeral-")` under `$TMPDIR` so `{{SESSION_DIR}}` substitution in agent prompts always has a valid path. The fallback dir is **not automatically cleaned up**; each one is empty (nothing is written there today). If it accumulates, `rm -rf $TMPDIR/pi-superpowers-ephemeral-*` is safe once no pi session is active.
 
 ## Updating superpowers
 

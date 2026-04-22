@@ -4,22 +4,31 @@ All notable changes to this project are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). This project
 adheres to [Semantic Versioning](https://semver.org/).
 
-## [0.1.0] — 2026-04-21
+## [0.1.0] — 2026-04-22
 
 Initial release.
 
-- 15 superpowers skills auto-registered from `vendor/superpowers/`.
-- First-turn bootstrap injects `using-superpowers` + pi tool mapping
+- 14 superpowers skills + 3 commands + 1 agent auto-registered from
+  `vendor/superpowers/`.
+- First-turn bootstrap injects `using-superpowers` + pi tool-mapping
   addendum.
-- Native `superpowers_todo` tool (via `pi-tasks`) with in-progress
-  discipline.
-- Native `superpowers_subagent` tool (via `pi-agents`) with single and
-  parallel modes, live streaming, and abort.
-- Dynamic skill frontmatter: every dispatched subagent receives the
-  full Superpowers skill corpus inlined into its system prompt.
-- Persistent above-editor todo widget that survives `/compact`.
-- Session-start status footer.
-- Ephemeral tmpdir fallback for pi `--no-session` mode.
+- Native `task` tool (via `pi-tasks`) with in-progress discipline and
+  an above-editor widget that survives `/compact`.
+- Native `agent` tool (via `pi-agents`) with single / parallel / chain
+  modes (chain uses `{previous}` substitution for prior-step output),
+  live streaming, and abort.
+- **Progressive skill disclosure for dispatched subagents.** The
+  dispatched agent's system prompt carries a compact `<skills>` XML
+  manifest (name + description + path) per the
+  [agentskills.io spec](https://agentskills.io/integrate-skills); skill
+  bodies load on demand via the agent's `read` tool. No more 25–30k
+  token baseline per dispatch.
+- Model inheritance: dispatched agents run on the parent session's
+  current model unless a specific `model: "provider/name"` is declared
+  upstream. `SUPERPOWERS_AGENT_MODEL` env override supported.
+- Session-start status footer: `🦸 Superpowers · 14 skills · tasks + agents`.
+- Ephemeral tmpdir fallback for pi `--no-session` mode (session-scoped
+  prompt variable substitution).
 - Upstream parity against [obra/superpowers](https://github.com/obra/superpowers):
   generic skill / command / agent loaders, `parity-check` CLI, sync
   playbook (`docs/sync-playbook.md`).
