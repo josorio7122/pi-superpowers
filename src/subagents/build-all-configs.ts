@@ -39,7 +39,7 @@ export async function buildAllAgentConfigs(props: BuildAllProps): Promise<BuildA
   const skills = scan.skills.length > 0 ? scan.skills : fallbackSkills();
 
   for (const agent of props.agents) {
-    const built = await buildAgentConfig(agent, { sessionDir: props.sessionDir, skills });
+    const built = buildAgentConfig(agent, { sessionDir: props.sessionDir, skills });
     const validation = validateAgent({
       frontmatter: built.frontmatter,
       body: built.systemPrompt,

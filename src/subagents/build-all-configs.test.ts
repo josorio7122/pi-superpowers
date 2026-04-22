@@ -49,7 +49,7 @@ describe("buildAllAgentConfigs", () => {
     expect(result.configs).toHaveLength(2);
     for (const cfg of result.configs) {
       expect(cfg.frontmatter.skills).toHaveLength(2);
-      const paths = cfg.frontmatter.skills.map((s) => s.path).sort();
+      const paths = [...(cfg.frontmatter.skills ?? [])].sort();
       expect(paths[0]).toContain("brainstorming/SKILL.md");
       expect(paths[1]).toContain("writing-plans/SKILL.md");
     }
@@ -59,8 +59,9 @@ describe("buildAllAgentConfigs", () => {
     const agents: AgentFrontmatterLike[] = [{ name: "code-reviewer", body: "You are a reviewer." }];
     const result = await buildAllAgentConfigs({ agents, sessionDir, skillsDir: "/nonexistent/path/xyz" });
     expect(result.configs).toHaveLength(1);
-    expect(result.configs[0]?.frontmatter.skills).toHaveLength(1);
-    expect(result.configs[0]?.frontmatter.skills[0]?.path).toContain("using-superpowers/SKILL.md");
+    const skills = result.configs[0]?.frontmatter.skills ?? [];
+    expect(skills).toHaveLength(1);
+    expect(skills[0]).toContain("using-superpowers/SKILL.md");
     expect(result.diagnostics.some((d) => d.message.includes("skills dir missing"))).toBe(true);
   });
 

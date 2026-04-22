@@ -5,10 +5,22 @@ export type AgentFrontmatterLike = {
   description?: string;
   tools?: string[];
   model?: string;
+  skills?: readonly string[];
   body: string;
 };
 
 function normalizeTools(value: unknown): string[] | undefined {
+  if (Array.isArray(value)) return value.map((v) => String(v).trim()).filter(Boolean);
+  if (typeof value === "string") {
+    return value
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }
+  return undefined;
+}
+
+function normalizeSkills(value: unknown): string[] | undefined {
   if (Array.isArray(value)) return value.map((v) => String(v).trim()).filter(Boolean);
   if (typeof value === "string") {
     return value
@@ -24,6 +36,7 @@ export function parseAgentMarkdown(source: string): AgentFrontmatterLike | null 
   const fm = parsed.data as Record<string, unknown>;
   const name = typeof fm.name === "string" ? fm.name.trim() : "";
   if (!name) return null;
+
   const result: AgentFrontmatterLike = {
     name,
     body: parsed.content.trim(),
@@ -32,5 +45,7 @@ export function parseAgentMarkdown(source: string): AgentFrontmatterLike | null 
   const tools = normalizeTools(fm.tools);
   if (tools) result.tools = tools;
   if (typeof fm.model === "string") result.model = fm.model;
+  const skills = normalizeSkills(fm.skills);
+  if (skills) result.skills = skills;
   return result;
 }

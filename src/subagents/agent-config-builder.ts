@@ -1,6 +1,3 @@
-import { mkdir, writeFile } from "node:fs/promises";
-import { dirname, join } from "node:path";
-import { fileExists } from "../common/fs.js";
 import type { VendorSkill } from "../skills/scan.js";
 import type { AgentFrontmatterLike } from "./frontmatter.js";
 
@@ -8,18 +5,11 @@ export type PiAgentConfig = {
   frontmatter: {
     name: string;
     description: string;
-    model: string;
-    role: "worker" | "lead" | "orchestrator";
+    model?: string;
     color: string;
     icon: string;
-    domain: Array<{ path: string; read: boolean; write: boolean; delete: boolean }>;
     tools: string[];
-    skills: Array<{ path: string; when: string }>;
-    knowledge: {
-      project: { path: string; description: string; updatable: boolean; "max-lines": number };
-      general: { path: string; description: string; updatable: boolean; "max-lines": number };
-    };
-    conversation: { path: string };
+    skills: string[];
   };
   systemPrompt: string;
   filePath: string;
@@ -31,12 +21,11 @@ export type BuildCtx = {
   skills: ReadonlyArray<VendorSkill>;
 };
 
-const DEFAULT_TOOLS = ["read", "write", "edit", "bash", "grep", "glob"];
+// Pi's active default tool set — matches @mariozechner/pi-coding-agent dist/core/sdk.js:139.
+const DEFAULT_TOOLS: readonly string[] = ["read", "bash", "edit", "write"];
 const MODEL_FORMAT = /^.+\/.+$/;
-const PINNED_DEFAULT_MODEL = "openai-codex/gpt-5.4";
 
-function resolveModel(upstream: string | undefined): string {
-  // Env var overrides everything.
+function resolveModel(upstream: string | undefined): string | undefined {
   const override = process.env.SUPERPOWERS_AGENT_MODEL;
   if (override) {
     if (!MODEL_FORMAT.test(override)) {
@@ -44,61 +33,29 @@ function resolveModel(upstream: string | undefined): string {
     }
     return override;
   }
-  // Upstream 'inherit' or missing → pinned default.
-  const value = upstream ?? "inherit";
-  if (value === "inherit") return PINNED_DEFAULT_MODEL;
-  // Explicit upstream must be valid 'provider/model'.
-  if (!MODEL_FORMAT.test(value)) {
-    throw new Error(`invalid model '${value}' — expected 'provider/model' format`);
-  }
-  return value;
+  return upstream;
 }
 
-async function ensureStubFile(path: string, description: string): Promise<void> {
-  if (await fileExists(path)) return;
-  await mkdir(dirname(path), { recursive: true });
-  await writeFile(path, `# ${description}\n\n(empty stub — safe to fill)\n`);
+function resolveSkillsForAgent(upstream: AgentFrontmatterLike, all: readonly VendorSkill[]): string[] {
+  const declared = upstream.skills;
+  if (!declared || declared.length === 0) return all.map((s) => s.path);
+  const byName = new Map(all.map((s) => [s.name, s.path]));
+  return declared.map((name) => byName.get(name)).filter((p): p is string => p !== undefined);
 }
 
-export async function buildAgentConfig(upstream: AgentFrontmatterLike, ctx: BuildCtx): Promise<PiAgentConfig> {
-  const superpowersDir = join(ctx.sessionDir, "superpowers");
-  const projectPath = join(superpowersDir, `${upstream.name}-project.md`);
-  const generalPath = join(superpowersDir, `${upstream.name}-general.md`);
-  await ensureStubFile(projectPath, `Project context for ${upstream.name}`);
-  await ensureStubFile(generalPath, `General knowledge for ${upstream.name}`);
-
-  const tools = upstream.tools && upstream.tools.length > 0 ? upstream.tools : DEFAULT_TOOLS;
+export function buildAgentConfig(upstream: AgentFrontmatterLike, ctx: BuildCtx): PiAgentConfig {
+  const tools = upstream.tools && upstream.tools.length > 0 ? [...upstream.tools] : [...DEFAULT_TOOLS];
   const model = resolveModel(upstream.model);
-  const description = upstream.description ?? upstream.name;
 
   return {
     frontmatter: {
       name: upstream.name,
-      description,
-      model,
-      role: "worker",
+      description: upstream.description ?? upstream.name,
+      ...(model !== undefined ? { model } : {}),
       color: "#f5a623",
       icon: "🦸",
-      domain: [{ path: ".", read: true, write: true, delete: false }],
       tools,
-      skills: ctx.skills.map((s) => ({ path: s.path, when: s.description || "always" })),
-      knowledge: {
-        project: {
-          path: projectPath,
-          description: `Project context for ${upstream.name}`,
-          updatable: true,
-          "max-lines": 500,
-        },
-        general: {
-          path: generalPath,
-          description: `General knowledge for ${upstream.name}`,
-          updatable: true,
-          "max-lines": 500,
-        },
-      },
-      conversation: {
-        path: join(superpowersDir, `${upstream.name}-{{SESSION_ID}}.jsonl`),
-      },
+      skills: resolveSkillsForAgent(upstream, ctx.skills),
     },
     systemPrompt: upstream.body,
     filePath: `vendor/superpowers/agents/${upstream.name}.md`,

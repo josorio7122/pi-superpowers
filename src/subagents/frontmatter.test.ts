@@ -41,4 +41,27 @@ body`;
   it("returns null with no frontmatter at all", () => {
     expect(parseAgentMarkdown("just a body, no frontmatter")).toBeNull();
   });
+
+  it("parses skills: [brainstorming, test-driven-development]", () => {
+    const src = `---
+name: x
+description: y
+skills:
+  - brainstorming
+  - test-driven-development
+---
+body`;
+    const parsed = parseAgentMarkdown(src);
+    expect(parsed?.skills).toEqual(["brainstorming", "test-driven-development"]);
+  });
+
+  it("returns undefined skills when field is absent", () => {
+    const src = `---
+name: x
+description: y
+---
+body`;
+    const parsed = parseAgentMarkdown(src);
+    expect(parsed?.skills).toBeUndefined();
+  });
 });

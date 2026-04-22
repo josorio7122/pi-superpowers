@@ -1,6 +1,5 @@
 // Thin pi extension entrypoint. Consumes pi-tasks + pi-agents raw.
 
-import { join } from "node:path";
 import { createAgentTool } from "pi-agents";
 import { createTasksTool } from "pi-tasks";
 import { buildInjectHandler } from "./bootstrap/inject.js";
@@ -71,7 +70,6 @@ export default async function superpowersExtension(pi: ExtensionAPI): Promise<vo
         modelRegistry: anyCtx.modelRegistry as never,
         cwd: anyCtx.cwd,
         sessionDir,
-        conversationLogPath: join(sessionDir, "superpowers", "dispatch.jsonl"),
       }),
     );
   }) as never);
