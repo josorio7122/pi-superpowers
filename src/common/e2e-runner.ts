@@ -73,7 +73,16 @@ export async function runPiE2E(props: RunPiE2EProps): Promise<RunPiE2EResult> {
   const markerDir = await mkdtemp(join(tmpdir(), "pisup-e2e-"));
   const args = props.args ?? ["--mode", "json", "-p", "--no-session", "-e", "./src/index.ts"];
   const timeoutMs = props.timeoutMs ?? 60_000;
-  const env = { ...process.env, SUPERPOWERS_MARKER_DIR: markerDir, ...(props.env ?? {}) } as Record<string, string>;
+  // Both env vars point at the same tmpdir: pi-superpowers' own markers use
+  // SUPERPOWERS_MARKER_DIR; pi-tasks (which ships the `task` tool whose widget we assert on)
+  // reads PI_TASKS_MARKER_DIR in its own markers helper. Keep both pointing at the same
+  // dir so `readMarkers(markerDir)` sees markers from both sources.
+  const env = {
+    ...process.env,
+    SUPERPOWERS_MARKER_DIR: markerDir,
+    PI_TASKS_MARKER_DIR: markerDir,
+    ...(props.env ?? {}),
+  } as Record<string, string>;
 
   const { stdout, stderr } = await spawnPi({ args, prompt: props.prompt, timeoutMs, env });
   const markers = await readMarkers(markerDir);
