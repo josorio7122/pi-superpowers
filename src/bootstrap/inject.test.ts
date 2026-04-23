@@ -70,4 +70,18 @@ describe("buildInjectHandler", () => {
     expect(out?.message?.content).toContain("| `Read` | `read` |");
     expect(out?.message?.content.toLowerCase()).toContain("could not load");
   });
+
+  it("does not tell the model to use /skill:name; points at read + <available_skills> + <location>", async () => {
+    const skillPath = await fixtureSkill("# using-superpowers\n\nBody content");
+    const handler = buildInjectHandler({ usingSkillPath: skillPath, subagentAvailable: true });
+    const out = await handler(
+      { prompt: "hi", images: [], systemPrompt: "" },
+      mockCtx([{ role: "user", content: "hi" }]),
+    );
+    const content = out?.message?.content ?? "";
+    expect(content).not.toMatch(/\/skill:/);
+    expect(content).toContain("<available_skills>");
+    expect(content).toContain("<location>");
+    expect(content.toLowerCase()).toContain("read");
+  });
 });
