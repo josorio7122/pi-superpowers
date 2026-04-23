@@ -23,6 +23,6 @@ export function renderToolMappingMarkdown(): string {
     "|---|---|",
     rows,
     "",
-    "To load a skill listed in `<available_skills>`, use `read` on its `<location>` path (e.g. `read /Users/.../vendor/superpowers/skills/brainstorming/SKILL.md`).",
+    "To load a skill listed in `<available_skills>`, use `read` on the absolute path shown in its `<location>` element (that path always ends in `/SKILL.md`).",
   ].join("\n");
 }
