@@ -9,8 +9,15 @@ describe("renderPiAddendum", () => {
     expect(text).toContain("| `Task` | `agent` |");
   });
 
-  it("mentions pi-native /skill:name", () => {
-    expect(renderPiAddendum({ subagentAvailable: true })).toContain("/skill:");
+  it("directs the model to read SKILL.md at the location listed in <available_skills>", () => {
+    const text = renderPiAddendum({ subagentAvailable: true });
+    expect(text).toContain("<available_skills>");
+    expect(text).toContain("<location>");
+    expect(text).toContain("`read`");
+  });
+
+  it("does not tell the model to invoke /skill:name", () => {
+    expect(renderPiAddendum({ subagentAvailable: true })).not.toMatch(/\/skill:/);
   });
 
   it("warns when subagent is unavailable", () => {
