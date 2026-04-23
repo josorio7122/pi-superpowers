@@ -66,7 +66,7 @@ export function buildInjectHandler(opts: InjectOptions): InjectHandler {
       "<EXTREMELY_IMPORTANT>",
       "You have superpowers.",
       "",
-      "**Below is the full content of your 'superpowers:using-superpowers' skill — your introduction to using skills. For all other skills, use pi's `/skill:name` loader.**",
+      "**Below is the full content of your 'superpowers:using-superpowers' skill — your introduction to using skills. For every other skill, find it in the `<available_skills>` section of the system prompt and `read` the SKILL.md at the `<location>` path shown there.**",
       "",
       skillSection,
       "",

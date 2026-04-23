@@ -10,7 +10,6 @@ export const TOOL_MAPPING = {
   Glob: "glob",
   TodoWrite: "task",
   Task: "agent",
-  Skill: "/skill:name (pi-native)",
 } as const;
 
 export type ClaudeCodeToolName = keyof typeof TOOL_MAPPING;
@@ -24,6 +23,6 @@ export function renderToolMappingMarkdown(): string {
     "|---|---|",
     rows,
     "",
-    "Load any skill on demand with `/skill:name` (e.g. `/skill:brainstorming`).",
+    "To load a skill listed in `<available_skills>`, use `read` on the absolute path shown in its `<location>` element (that path always ends in `/SKILL.md`).",
   ].join("\n");
 }

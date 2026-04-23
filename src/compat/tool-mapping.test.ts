@@ -11,7 +11,10 @@ describe("TOOL_MAPPING", () => {
     expect(TOOL_MAPPING.Glob).toBe("glob");
     expect(TOOL_MAPPING.TodoWrite).toBe("task");
     expect(TOOL_MAPPING.Task).toBe("agent");
-    expect(TOOL_MAPPING.Skill).toBe("/skill:name (pi-native)");
+  });
+
+  it("does not expose Skill as a model-invokable mapping", () => {
+    expect((TOOL_MAPPING as Record<string, string>).Skill).toBeUndefined();
   });
 
   it("has no duplicate pi values", () => {
@@ -30,7 +33,19 @@ describe("renderToolMappingMarkdown", () => {
     expect(md).toContain("| `Task` | `agent` |");
   });
 
-  it("includes a note about /skill:name", () => {
-    expect(renderToolMappingMarkdown()).toMatch(/\/skill:/);
+  it("does not include a Skill row (not a model-invokable tool)", () => {
+    const md = renderToolMappingMarkdown();
+    expect(md).not.toContain("| `Skill` |");
+  });
+
+  it("directs the model to read SKILL.md at the location listed in <available_skills>", () => {
+    const md = renderToolMappingMarkdown();
+    expect(md).toContain("<available_skills>");
+    expect(md).toContain("<location>");
+    expect(md).toContain("`read`");
+  });
+
+  it("does not tell the model to invoke /skill:name", () => {
+    expect(renderToolMappingMarkdown()).not.toMatch(/\/skill:/);
   });
 });
