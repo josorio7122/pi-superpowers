@@ -89,10 +89,6 @@ npm run simulate-ui widget
 
 Tweak `src/ui/tree.ts` or any `src/*/render.ts` and re-run to see changes live. The simulator is a design-preview tool — regression safety lives in `*.test.ts` snapshot tests.
 
-## Architecture
-
-See the feature-complete design in [`docs/specs/2026-04-23-v5.1-feature-complete-design.md`](docs/specs/2026-04-23-v5.1-feature-complete-design.md) (filename carries the historical v5.1 label; content is current).
-
 ## License
 
 MIT. Upstream skills under `vendor/superpowers/` retain the upstream [MIT license](vendor/superpowers/LICENSE).

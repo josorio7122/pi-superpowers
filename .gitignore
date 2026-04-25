@@ -8,3 +8,5 @@ coverage/
 .pi/
 .worktrees/
 worktrees/
+.playwright-cli/
+docs/superpowers/
