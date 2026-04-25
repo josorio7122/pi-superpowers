@@ -72,8 +72,7 @@ The rule targets *literal* string assembly, not variable concatenation.
 
 ## Docs discipline
 
-- Specs and plans live under `docs/specs/` and `docs/plans/` and **are committed** (maintainer preference for this repo).
-- Filename convention: `YYYY-MM-DD-<short-name>.md`.
+- Specs and plans are **not committed** — keep them local. `docs/superpowers/` is gitignored.
 - **Keep docs current** — when adding/removing/changing files, APIs, or behavior, update `README.md`, `docs/`, JSDoc, `AGENTS.md`, `CHANGELOG.md`.
 
 ## When in doubt
