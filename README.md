@@ -2,7 +2,7 @@
 
 [Superpowers](https://github.com/obra/superpowers) skills library as a native pi package — with full subagent support.
 
-Consumes pi-tasks + pi-agents raw: 14 skills + 3 commands + 1 agent auto-registered from `vendor/superpowers/`, first-turn bootstrap, native `task` tool (pi-tasks) with in_progress discipline, native `agent` tool (pi-agents) with live streaming + abort. Dispatched subagents use pi's native **progressive skill disclosure** — only skill descriptions ship in the system prompt; bodies load on demand via `read`.
+Consumes pi-tasks + pi-agents raw: 14 skills + 3 commands + 1 agent auto-registered from `vendor/superpowers/`, first-turn bootstrap, native four-tool task system (pi-tasks v0.2.0 — `task_create` / `task_update` / `task_list` / `task_get`) with in_progress discipline, native `agent` tool (pi-agents) with live streaming + abort. Dispatched subagents use pi's native **progressive skill disclosure** — only skill descriptions ship in the system prompt; bodies load on demand via `read`.
 
 ## Install
 
@@ -26,7 +26,7 @@ The `-e` flag loads the extension directly from source with no install — great
 |---|---|
 | **14 superpowers skills** | `/skill:brainstorming`, `/skill:writing-plans`, etc. |
 | **First-turn bootstrap** | Automatic — injects `using-superpowers` + pi tool mapping on every new pi session |
-| **`task` tool** | Model calls with `{ action: "add", content: "..." }` and variants: replace, update, complete, remove, clear, list |
+| **Four task tools** | `task_create` (subject + description), `task_update` (status / fields), `task_list` (all tasks), `task_get` (one by id) — V2 plain-text output mirrors Claude Code |
 | **`agent` tool** | Single: `{ agent, task }`. Parallel: `{ tasks: [...] }`. Chain: `{ chain: [...] }` with `{previous}` substitution |
 | **Progressive skill disclosure** | Dispatched agents receive a compact `<skills>` XML manifest (name + description + path) per [agentskills.io](https://agentskills.io/integrate-skills); bodies load via `read` on demand |
 | **Model inheritance** | Dispatched subagents run on the parent session's current model unless overridden upstream; `SUPERPOWERS_AGENT_MODEL` env var also supported |

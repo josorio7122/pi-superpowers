@@ -5,14 +5,15 @@ const ENABLED = Boolean(process.env.PI_BIN) && process.env.E2E_FULL === "1";
 const describeIfFull = ENABLED ? describe : describe.skip;
 
 describeIfFull("todo widget persistence", () => {
-  it("after adding a todo, at least one widget-set marker has lineCount > 0", async () => {
+  it("after task_create, at least one task-event marker has kind=create", async () => {
     const result = await runPiE2E({
-      prompt: 'Use the task tool to add a task with content "survive compaction test", then finish.',
+      prompt:
+        'Use task_create to add a task with subject "survive compaction test" and description "persistence smoke test", then finish.',
       timeoutMs: 120_000,
     });
     try {
-      const widgets = result.markers.filter((m) => m.name === "widget-set");
-      expect(widgets.some((w) => (w.payload as { lineCount: number }).lineCount > 0)).toBe(true);
+      const events = result.markers.filter((m) => m.name === "task-event");
+      expect(events.some((e) => (e.payload as { kind: string }).kind === "create")).toBe(true);
     } finally {
       await result.cleanup();
     }

@@ -9,17 +9,18 @@ describe("TOOL_MAPPING", () => {
     expect(TOOL_MAPPING.Bash).toBe("bash");
     expect(TOOL_MAPPING.Grep).toBe("grep");
     expect(TOOL_MAPPING.Glob).toBe("glob");
-    expect(TOOL_MAPPING.TodoWrite).toBe("task");
+    expect(TOOL_MAPPING.TodoWrite).toEqual(["task_create", "task_update", "task_list", "task_get"]);
     expect(TOOL_MAPPING.Task).toBe("agent");
   });
 
   it("does not expose Skill as a model-invokable mapping", () => {
-    expect((TOOL_MAPPING as Record<string, string>).Skill).toBeUndefined();
+    expect((TOOL_MAPPING as Record<string, unknown>).Skill).toBeUndefined();
   });
 
-  it("has no duplicate pi values", () => {
-    const values = Object.values(TOOL_MAPPING);
-    const dupes = values.filter((v, i) => values.indexOf(v) !== i);
+  it("has no duplicate pi values across scalar mappings", () => {
+    const values = Object.values(TOOL_MAPPING) as Array<string | readonly string[]>;
+    const scalars = values.filter((v): v is string => typeof v === "string");
+    const dupes = scalars.filter((v, i) => scalars.indexOf(v) !== i);
     expect(dupes).toEqual([]);
   });
 });
@@ -29,7 +30,7 @@ describe("renderToolMappingMarkdown", () => {
     const md = renderToolMappingMarkdown();
     expect(md).toContain("| Claude Code | pi equivalent |");
     expect(md).toContain("| `Read` | `read` |");
-    expect(md).toContain("| `TodoWrite` | `task` |");
+    expect(md).toContain("| `TodoWrite` | `task_create` / `task_update` / `task_list` / `task_get` |");
     expect(md).toContain("| `Task` | `agent` |");
   });
 

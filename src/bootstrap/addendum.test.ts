@@ -5,7 +5,7 @@ describe("renderPiAddendum", () => {
   it("contains the pi tool-mapping table", () => {
     const text = renderPiAddendum({ subagentAvailable: true });
     expect(text).toContain("| `Read` | `read` |");
-    expect(text).toContain("| `TodoWrite` | `task` |");
+    expect(text).toContain("| `TodoWrite` | `task_create` / `task_update` / `task_list` / `task_get` |");
     expect(text).toContain("| `Task` | `agent` |");
   });
 
