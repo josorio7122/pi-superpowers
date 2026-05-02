@@ -33,6 +33,6 @@ git tag v5.X.Y && git push --follow-tags
 
 ## What stays hand-maintained
 
-The only hand-maintained registration is `src/subagents/builtin-agents.ts` — currently just `general-purpose`, which Claude Code provides natively and upstream references in skill prompts but does not vendor. Parity-check whitelists these.
+The only hand-maintained registration is `src/subagents/builtin-agents.ts` — currently just `general-purpose`, which the upstream Anthropic harness provides natively as a built-in agent and upstream references in skill prompts but does not vendor. Parity-check whitelists these.
 
 Environmental gap-fills (`superpowers_todo` as TodoWrite equivalent, `superpowers_subagent` as Task tool equivalent, first-turn bootstrap as SessionStart hook equivalent) are extension features that make upstream skills runnable on pi — not parity surfaces.

@@ -16,7 +16,7 @@ export { buildInjectHandler } from "./bootstrap/inject.js";
 export type { MarkerPayload } from "./common/markers.js";
 export { writeMarker } from "./common/markers.js";
 
-export type { ClaudeCodeToolName } from "./compat/tool-mapping.js";
+export type { UpstreamToolName } from "./compat/tool-mapping.js";
 export { renderToolMappingMarkdown, TOOL_MAPPING } from "./compat/tool-mapping.js";
 
 export type { DiscoverHandler, DiscoverOptions } from "./skills/discover.js";

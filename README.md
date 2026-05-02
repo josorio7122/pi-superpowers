@@ -26,7 +26,7 @@ The `-e` flag loads the extension directly from source with no install — great
 |---|---|
 | **14 superpowers skills** | `/skill:brainstorming`, `/skill:writing-plans`, etc. |
 | **First-turn bootstrap** | Automatic — injects `using-superpowers` + pi tool mapping on every new pi session |
-| **Four task tools** | `task_create` (subject + description), `task_update` (status / fields), `task_list` (all tasks), `task_get` (one by id) — V2 plain-text output mirrors Claude Code |
+| **Four task tools** | `task_create` (subject + description), `task_update` (status / fields), `task_list` (all tasks), `task_get` (one by id) — V2 plain-text output (compact, one line per task) |
 | **`agent` tool** | Single: `{ agent, task }`. Parallel: `{ tasks: [...] }`. Chain: `{ chain: [...] }` with `{previous}` substitution |
 | **Progressive skill disclosure** | Dispatched agents receive a compact `<skills>` XML manifest (name + description + path) per [agentskills.io](https://agentskills.io/integrate-skills); bodies load via `read` on demand |
 | **Model inheritance** | Dispatched subagents run on the parent session's current model unless overridden upstream; `SUPERPOWERS_AGENT_MODEL` env var also supported |

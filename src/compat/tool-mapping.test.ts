@@ -28,7 +28,7 @@ describe("TOOL_MAPPING", () => {
 describe("renderToolMappingMarkdown", () => {
   it("produces a markdown table with all mappings", () => {
     const md = renderToolMappingMarkdown();
-    expect(md).toContain("| Claude Code | pi equivalent |");
+    expect(md).toContain("| Upstream tool | pi equivalent |");
     expect(md).toContain("| `Read` | `read` |");
     expect(md).toContain("| `TodoWrite` | `task_create` / `task_update` / `task_list` / `task_get` |");
     expect(md).toContain("| `Task` | `agent` |");
