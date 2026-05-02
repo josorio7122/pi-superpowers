@@ -4,10 +4,10 @@ import type { AgentFrontmatterLike } from "./frontmatter.js";
 // after upstream `agents/*.md` parsing; upstream entries with the same name
 // take precedence on name collision.
 //
-// Philosophy: mirror Claude Code's built-in subagent types that superpowers
-// skills implicitly depend on. Do NOT register skill prompt-template files
-// (*-prompt.md) as agents — those are read by the model and passed as the
-// `task` argument when dispatching. Same pattern as CC.
+// Philosophy: built-in subagent types referenced by upstream superpowers
+// skills. Do NOT register skill prompt-template files (*-prompt.md) as
+// agents — those are read by the model and passed as the `task` argument
+// when dispatching. Same pattern as the upstream harness.
 
 export const BUILTIN_AGENTS: AgentFrontmatterLike[] = [
   {
